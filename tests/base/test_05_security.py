@@ -75,8 +75,7 @@ class SecurityBaselineTest(unittest.TestCase):
                 if match and not any(word in match.group(2).lower()
                                      for word in FAKE_WORDS):
                     problems.append(f'{path.name}:{number}: {line.strip()}')
-        self.assertEqual(problems, [],
-                         'API Key 는 os.environ 으로만 읽어야 합니다.')
+        self.assertEqual(problems, [], 'API Key 는 os.environ 으로만 읽어야 합니다.')
 
 
 if __name__ == '__main__':

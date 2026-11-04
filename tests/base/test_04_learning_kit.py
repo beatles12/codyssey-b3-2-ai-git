@@ -76,8 +76,7 @@ class FakeAITest(unittest.TestCase):
                     {'messages': [{'role': 'user', 'content': '커밋'}]}, 5)
         self.assertEqual(fake.call_count, 1)
         self.assertEqual(data['content'][-1]['type'], 'text')
-        self.assertEqual(data['content'][-1]['text'],
-                         fake_ai.FAKE_COMMIT_TEXT)
+        self.assertEqual(data['content'][-1]['text'], fake_ai.FAKE_COMMIT_TEXT)
 
     def test_openai_shape_and_pr_text(self):
         """openai 주소면 choices 모양, 프롬프트에 How to Test 가 있으면 PR 글"""
@@ -124,8 +123,7 @@ class PracticeDataTest(PracticeTestCase):
                      'anthropic_error_401', 'anthropic_error_400',
                      'anthropic_error_429'):
             with self.subTest(file=name):
-                data = json.loads(self.read_data(
-                    f'api_responses/{name}.json'))
+                data = json.loads(self.read_data(f'api_responses/{name}.json'))
                 self.assertIsInstance(data, dict)
 
 

@@ -72,8 +72,7 @@ class MaskTest(PracticeTestCase):
     def test_diff_structure_is_kept(self):
         """마스킹 후에도 diff 의 줄 수와 파일 머리줄은 그대로다"""
         masked = safety.mask_sensitive(self.diff)
-        self.assertEqual(len(masked.splitlines()),
-                         len(self.diff.splitlines()))
+        self.assertEqual(len(masked.splitlines()), len(self.diff.splitlines()))
         self.assertIn('diff --git a/todo_app/settings.py', masked)
 
     def test_optional_phone_number_is_masked(self):
@@ -104,8 +103,7 @@ class LimitDiffTest(PracticeTestCase):
 
     def test_optional_custom_limits(self):
         """(선택) max_files / max_lines 값을 바꿔 줄 수 있다"""
-        result = safety.limit_diff(make_big_diff(), max_files=2,
-                                   max_lines=20)
+        result = safety.limit_diff(make_big_diff(), max_files=2, max_lines=20)
         self.assertLessEqual(result.count('diff --git '), 2)
         self.assertLessEqual(len(result.splitlines()), 21)
 

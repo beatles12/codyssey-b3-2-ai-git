@@ -20,7 +20,7 @@ import sys
 from learning_kit.paths import PROJECT_ROOT
 
 
-def _line(ok, text):
+def _print_check(ok, text):
     mark = '[OK]  ' if ok else '[확인]'
     print(f'  {mark} {text}')
     return ok
@@ -33,26 +33,26 @@ def main():
     all_ok = True
 
     version = sys.version_info
-    all_ok &= _line(version >= (3, 10),
-                    f'Python {platform.python_version()} '
-                    '(3.10 이상 필요)')
+    all_ok &= _print_check(version >= (3, 10),
+                           f'Python {platform.python_version()} '
+                           '(3.10 이상 필요)')
 
     git_path = shutil.which('git')
     if git_path:
         result = subprocess.run(['git', '--version'], capture_output=True,
                                 text=True)
-        all_ok &= _line(result.returncode == 0, result.stdout.strip())
+        all_ok &= _print_check(result.returncode == 0, result.stdout.strip())
     else:
-        all_ok &= _line(False, 'git 을 찾을 수 없습니다. Git 을 설치하세요.')
+        all_ok &= _print_check(False, 'git 을 찾을 수 없습니다. Git 을 설치하세요.')
 
     in_root = os.path.abspath(os.getcwd()) == str(PROJECT_ROOT)
-    _line(in_root, f'현재 폴더: {os.getcwd()}')
+    _print_check(in_root, f'현재 폴더: {os.getcwd()}')
     if not in_root:
         print(f'         프로젝트 폴더로 이동하세요: cd {PROJECT_ROOT}')
 
     has_key = bool(os.environ.get('AI_API_KEY', '').strip())
     if has_key:
-        _line(True, 'AI_API_KEY 설정됨 (값은 보안상 표시하지 않습니다)')
+        _print_check(True, 'AI_API_KEY 설정됨 (값은 보안상 표시하지 않습니다)')
     else:
         print('  [안내] AI_API_KEY 없음 — Step 1~7 은 키 없이 연습합니다. '
               'Step 8 에서만 필요합니다.')

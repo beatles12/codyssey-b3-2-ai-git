@@ -9,6 +9,11 @@ ai_client.call_ai_api(..., transport=FakeTransport()) 처럼 넘겨 쓰면
     fake.call_count        # 몇 번 불렸는지 (API 호출 횟수 확인)
     fake.calls[0]['body']  # 실제로 무엇을 보내려 했는지 확인
 
+FakeTransport(text=...)   돌려줄 글 고정 (None 이면 프롬프트에 'How to Test' 가
+                          있으면 PR 글, 없으면 커밋 글)
+FakeTransport(error=...)  호출되면 그 예외 발생 (예: 401 흉내)
+FakeTransport(texts=[...]) 호출될 때마다 차례대로 돌려줄 글 (재생성 연습용)
+
 [중요] 이 가짜 AI 는 diff 를 "이해"하지 않습니다. 언제나 아래에 적힌
 정해진 문장만 돌려줍니다. 실제 AI 결과는 Step 8 에서 1회만 확인하세요.
 """
@@ -58,11 +63,7 @@ FAKE_BROKEN_PR_TEXT = (
 
 def make_anthropic_response(text, stop_reason='end_turn',
                             with_thinking=True):
-    """Anthropic Messages API 응답 모양의 사전을 만든다.
-
-    with_thinking=True 면 content 맨 앞에 thinking 블록을 넣는다.
-    (최신 모델은 text 블록 앞에 thinking 블록을 돌려줄 수 있다.)
-    """
+    """Anthropic 응답 모양 사전을 만든다. with_thinking 이면 앞에 thinking 블록."""
     content = []
     if with_thinking:
         content.append({'type': 'thinking', 'thinking': '',
@@ -95,15 +96,7 @@ def make_openai_response(text, finish_reason='stop'):
 
 
 class FakeTransport:
-    """send_http_request 대신 쓰는 가짜 통신 함수(호출 가능한 객체).
-
-    매개변수
-        text  : 돌려줄 AI 글. None 이면 프롬프트에 'How to Test' 가 있으면
-                FAKE_PR_TEXT, 없으면 FAKE_COMMIT_TEXT 를 돌려준다.
-        error : 예외 객체. 주면 호출될 때 그 예외를 발생시킨다.
-                (예: AIClientError('HTTP 401 ...') 로 인증 실패 흉내)
-        texts : 여러 번 불릴 때 차례대로 돌려줄 글 목록 (재생성 연습용)
-    """
+    """send_http_request 대신 쓰는 가짜 통신 (text / error / texts 로 응답을 정함)."""
 
     def __init__(self, text=None, error=None, texts=None):
         self.text = text

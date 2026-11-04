@@ -73,8 +73,7 @@ class CommitFlowTest(FlowTestCase):
 
     def test_long_commit_title_is_fixed(self):
         """AI 가 72자 넘는 제목을 줘도 최종 출력 제목은 72자 이하"""
-        # 첫 응답은 너무 긴 제목, (재생성한다면) 두 번째 응답은 정상.
-        # 후처리(1회 호출)와 재생성(최대 2회 호출) 모두 통과할 수 있다.
+        # 첫 응답은 긴 제목, 두 번째(재생성 시)는 정상 → 후처리·재생성 모두 통과
         fake = FakeTransport(texts=[FAKE_LONG_TITLE_TEXT, FAKE_COMMIT_TEXT])
         code, output, _fake = self.run_cli(['commit'], transport=fake)
         self.assertEqual(code, 0, output)

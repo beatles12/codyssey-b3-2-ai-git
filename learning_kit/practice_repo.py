@@ -167,9 +167,7 @@ def _git(repo, *args):
         encoding='utf-8', errors='replace',
     )
     if result.returncode != 0:
-        raise RuntimeError(
-            f'git {" ".join(args)} 실패: {result.stderr.strip()}'
-        )
+        raise RuntimeError(f'git {" ".join(args)} 실패: {result.stderr.strip()}')
     return result.stdout
 
 
@@ -253,8 +251,7 @@ def create_practice_repo(target=PRACTICE_REPO_DIR, scenario='feature'):
     _git(target, 'init', '-q')
     (target / '.git' / MARKER_NAME).write_text(
         'B3-2 연습용 저장소 표시 파일\n', encoding='utf-8')
-    # 학습자가 이 폴더에서 직접 git commit 을 해 볼 수 있도록
-    # "이 저장소에만" 이름/이메일을 설정한다. (전역 설정은 건드리지 않음)
+    # 학습자가 직접 커밋해 볼 수 있게 "이 저장소에만" 이름/이메일 설정
     _git(target, 'config', 'user.name', PRACTICE_USER_NAME)
     _git(target, 'config', 'user.email', PRACTICE_USER_EMAIL)
     _git(target, 'config', 'commit.gpgsign', 'false')
@@ -262,10 +259,8 @@ def create_practice_repo(target=PRACTICE_REPO_DIR, scenario='feature'):
     for relative_path, content in BASE_FILES.items():
         _write(target, relative_path, content)
     _git(target, 'add', '.')
-    # --no-verify: 사용자 전역 설정의 commit hook 이 연습 저장소 생성을
-    # 막지 않도록 한다.
-    _git(target, 'commit', '-q', '--no-verify', '-m',
-         'chore: 할 일 관리 앱 초기 버전')
+    # --no-verify: 사용자 전역 commit hook 이 연습 저장소 생성을 막지 않게 함
+    _git(target, 'commit', '-q', '--no-verify', '-m', 'chore: 할 일 관리 앱 초기 버전')
 
     _apply_scenario(target, scenario)
     return target
@@ -288,8 +283,7 @@ def main(argv=None):
                         help='시나리오 이름 (기본: feature)')
     parser.add_argument('--path', default=str(PRACTICE_REPO_DIR),
                         help='만들 위치 (기본: 프로젝트/practice_repo)')
-    parser.add_argument('--list', action='store_true',
-                        help='시나리오 목록만 보여 주기')
+    parser.add_argument('--list', action='store_true', help='시나리오 목록만 보여 주기')
     args = parser.parse_args(argv)
 
     if args.list:

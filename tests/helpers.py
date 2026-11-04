@@ -44,8 +44,7 @@ class PracticeTestCase(unittest.TestCase):
         env_patcher.start()
         self.addCleanup(env_patcher.stop)
         os.environ.pop('AI_API_KEY', None)
-        # 임시 폴더 위쪽(예: 실수로 git init 한 홈 폴더)의 저장소를
-        # git 이 찾지 않도록 막는다. "저장소가 아님" 테스트가 정확해진다.
+        # 임시 폴더 위쪽(예: 실수로 git init 한 홈)의 저장소를 git 이 찾지 않게 한다
         temp_root = tempfile.gettempdir()
         os.environ['GIT_CEILING_DIRECTORIES'] = os.pathsep.join(
             dict.fromkeys([temp_root, os.path.realpath(temp_root)]))
@@ -78,10 +77,7 @@ class PracticeTestCase(unittest.TestCase):
     # --- 출력 캡처 ---------------------------------------------------------
     @staticmethod
     def capture(func, *args, **kwargs):
-        """func 실행 결과와 화면 출력(stdout+stderr)을 함께 돌려준다.
-
-        argparse 가 SystemExit 을 던지면 그 종료 코드를 결과로 돌려준다.
-        """
+        """func 결과(SystemExit 이면 종료 코드)와 stdout+stderr 출력을 돌려준다."""
         buffer = io.StringIO()
         with contextlib.redirect_stdout(buffer), \
                 contextlib.redirect_stderr(buffer):

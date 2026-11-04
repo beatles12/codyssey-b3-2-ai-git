@@ -135,8 +135,7 @@ class FriendlyResult(unittest.TestResult):
             status = 'fail'
         else:
             status = 'error'
-        self._record(test, status, err,
-                     prefix=f'{subtest._subDescription()} ')
+        self._record(test, status, err, prefix=f'{subtest._subDescription()} ')
 
     def addSkip(self, test, reason):
         super().addSkip(test, reason)

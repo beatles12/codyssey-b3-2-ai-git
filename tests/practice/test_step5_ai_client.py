@@ -75,10 +75,7 @@ def make_response(text, provider):
 
 
 def max_tokens_of(body, provider):
-    """요청 본문의 출력 길이 상한 값.
-
-    openai 형식은 최신 모델용 이름 max_completion_tokens 도 인정한다.
-    """
+    """출력 길이 상한 값 (openai 는 최신 모델용 max_completion_tokens 도 인정)."""
     if provider == 'openai' and 'max_completion_tokens' in body:
         return body['max_completion_tokens']
     return body['max_tokens']
@@ -103,14 +100,14 @@ class ProviderTestCase(PracticeTestCase):
             self.assertEqual(headers['authorization'], f'Bearer {FAKE_KEY}')
         self.assertIn('application/json', headers['content-type'])
 
-    def load(self, name):
+    def load_response(self, name):
         return json.loads(self.read_data(f'api_responses/{name}.json'))
 
     def bad_shapes(self, provider):
         if provider == 'anthropic':
             return [{}, {'content': []},
                     {'content': [{'type': 'thinking', 'thinking': ''}]},
-                    self.load('anthropic_error_401')]
+                    self.load_response('anthropic_error_401')]
         return [{}, {'choices': []}, {'error': {'message': 'bad'}}]
 
 
@@ -164,13 +161,11 @@ class RequestBodyTest(ProviderTestCase):
         self.assertEqual(body['model'], 'm-1')
         self.assertEqual(max_tokens_of(body, PROVIDER), 200)
         self.assertEqual(body['temperature'], 0.3)
-        self.assertEqual(body['messages'],
-                         [{'role': 'user', 'content': '안녕'}])
+        self.assertEqual(body['messages'], [{'role': 'user', 'content': '안녕'}])
 
     def test_body_is_json_serializable(self):
         """본문을 JSON 문자열로 바꿀 수 있다 (한글 포함)"""
-        body = ai_client.build_request_body('한글 프롬프트', 'm', 0.5, 10,
-                                            PROVIDER)
+        body = ai_client.build_request_body('한글 프롬프트', 'm', 0.5, 10, PROVIDER)
         self.assertIn('한글 프롬프트', json.dumps(body, ensure_ascii=False))
 
     def test_optional_temperature_none_is_omitted(self):
@@ -183,7 +178,7 @@ class ExtractTextTest(ProviderTestCase):
 
     def test_default_provider_response(self):
         """기본 제공자 응답에서 글자만 꺼낸다 (anthropic: thinking 블록 건너뛰기)"""
-        data = self.load(COMMIT_FIXTURE[PROVIDER])
+        data = self.load_response(COMMIT_FIXTURE[PROVIDER])
         self.assertEqual(ai_client.extract_text(data, PROVIDER),
                          FAKE_COMMIT_TEXT)
 
@@ -214,9 +209,8 @@ class ExtractTextTest(ProviderTestCase):
 
     def test_optional_other_provider_response(self):
         """(선택) 다른 제공자 응답도 꺼내고, 모양이 다르면 AIClientError"""
-        data = self.load(COMMIT_FIXTURE[OTHER])
-        self.assertEqual(ai_client.extract_text(data, OTHER),
-                         FAKE_COMMIT_TEXT)
+        data = self.load_response(COMMIT_FIXTURE[OTHER])
+        self.assertEqual(ai_client.extract_text(data, OTHER), FAKE_COMMIT_TEXT)
         for bad in self.bad_shapes(OTHER):
             with self.assertRaises(ai_client.AIClientError):
                 ai_client.extract_text(bad, OTHER)
@@ -247,8 +241,7 @@ class SendHttpRequestTest(PracticeTestCase):
         payload = getattr(request, 'data', None)
         if payload is None:
             payload = kwargs.get('data', args[1] if len(args) > 1 else None)
-        self.assertEqual(json.loads(payload.decode('utf-8')),
-                         {'prompt': '한글'})
+        self.assertEqual(json.loads(payload.decode('utf-8')), {'prompt': '한글'})
         self.assertEqual(request.get_method(), 'POST')
         sent = {key.lower(): value for key, value in request.header_items()}
         self.assertEqual(sent.get('x-api-key'), FAKE_KEY)
@@ -296,7 +289,7 @@ class SendHttpRequestTest(PracticeTestCase):
 
 class CallAiApiTest(ProviderTestCase):
 
-    def call(self, **kwargs):
+    def call_api(self, **kwargs):
         options = {'prompt': '커밋 메시지를 만들어 줘', 'model': 'm-1',
                    'temperature': 0.2, 'max_tokens': 300,
                    'provider': PROVIDER}
@@ -306,19 +299,19 @@ class CallAiApiTest(ProviderTestCase):
     def test_returns_generated_text(self):
         """가짜 AI 응답에서 글자를 꺼내 돌려준다"""
         fake = FakeTransport()
-        text = self.call(api_key=FAKE_KEY, transport=fake)
+        text = self.call_api(api_key=FAKE_KEY, transport=fake)
         self.assertEqual(text, FAKE_COMMIT_TEXT)
 
     def test_calls_transport_exactly_once(self):
         """AI 호출(transport)은 정확히 1번이다 (비용 관리)"""
         fake = FakeTransport()
-        self.call(api_key=FAKE_KEY, transport=fake)
+        self.call_api(api_key=FAKE_KEY, transport=fake)
         self.assertEqual(fake.call_count, 1)
 
     def test_sends_correct_request(self):
         """올바른 주소·헤더·본문·timeout 으로 보낸다"""
         fake = FakeTransport()
-        self.call(api_key=FAKE_KEY, transport=fake)
+        self.call_api(api_key=FAKE_KEY, transport=fake)
         call = fake.calls[0]
         self.assertEqual(call['url'], config.PROVIDERS[PROVIDER]['url'])
         self.check_headers(call['headers'], PROVIDER)
@@ -331,21 +324,22 @@ class CallAiApiTest(ProviderTestCase):
         """api_key 를 안 주면 환경변수에서 읽는다"""
         os.environ['AI_API_KEY'] = FAKE_KEY
         fake = FakeTransport()
-        self.call(transport=fake)
+        self.call_api(transport=fake)
         self.check_headers(fake.calls[0]['headers'], PROVIDER)
 
     def test_missing_key_never_calls_api(self):
         """API Key 가 없으면 AI 를 부르지 않고 MissingApiKeyError"""
         fake = FakeTransport()
         with self.assertRaises(ai_client.MissingApiKeyError):
-            self.call(transport=fake)
+            self.call_api(transport=fake)
         self.assertEqual(fake.call_count, 0)
 
     def test_transport_error_is_client_error(self):
         """통신 중 AIClientError 가 나면 그대로 AIClientError 로 전달된다"""
         error = ai_client.AIClientError('AI API 요청 실패 (HTTP 401)')
         with self.assertRaises(ai_client.AIClientError):
-            self.call(api_key=FAKE_KEY, transport=FakeTransport(error=error))
+            self.call_api(api_key=FAKE_KEY,
+                          transport=FakeTransport(error=error))
 
     def test_default_transport_uses_send_http_request(self):
         """transport 를 안 주면 send_http_request(urlopen)를 쓴다"""
@@ -353,14 +347,14 @@ class CallAiApiTest(ProviderTestCase):
         fake = FakeHTTPResponse(raw=data.encode('utf-8'))
         with mock.patch('urllib.request.urlopen',
                         return_value=fake) as urlopen:
-            text = self.call(api_key=FAKE_KEY)
+            text = self.call_api(api_key=FAKE_KEY)
         self.assertEqual(text, FAKE_COMMIT_TEXT)
         self.assertEqual(urlopen.call_count, 1)
 
     def test_optional_other_provider(self):
         """(선택) provider 를 바꾸면 그 제공자 주소로 보내고 응답을 읽는다"""
         fake = FakeTransport()
-        text = self.call(api_key=FAKE_KEY, transport=fake, provider=OTHER)
+        text = self.call_api(api_key=FAKE_KEY, transport=fake, provider=OTHER)
         self.assertEqual(fake.calls[0]['url'], config.PROVIDERS[OTHER]['url'])
         self.assertEqual(text, FAKE_COMMIT_TEXT)
 

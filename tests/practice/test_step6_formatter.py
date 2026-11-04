@@ -41,8 +41,7 @@ class ShortenTitleTest(PracticeTestCase):
 
     def test_short_title_unchanged(self):
         """짧은 제목은 그대로다"""
-        self.assertEqual(fm.shorten_title('feat: 검색 추가', 72),
-                         'feat: 검색 추가')
+        self.assertEqual(fm.shorten_title('feat: 검색 추가', 72), 'feat: 검색 추가')
 
     def test_long_title_is_cut(self):
         """긴 제목은 max_length 글자 이하로 줄고, 앞부분은 유지된다"""
@@ -93,8 +92,7 @@ class ValidateCommitTest(PracticeTestCase):
         self.assertEqual(
             fm.validate_commit_message('feat: x\n\napp.py 를 고쳤습니다.',
                                        ['app.py']), [])
-        self.assertEqual(
-            fm.validate_commit_message('feat: x\n\n- 검색 추가'), [])
+        self.assertEqual(fm.validate_commit_message('feat: x\n\n- 검색 추가'), [])
 
 
 class ValidatePrTest(PracticeTestCase):

@@ -28,8 +28,7 @@ class ConfigTest(unittest.TestCase):
                              config.DEFAULT_TEMPERATURE)
         self.assertLessEqual(config.DEFAULT_TEMPERATURE,
                              config.TEMPERATURE_MAX)
-        self.assertLessEqual(config.MAX_TOKENS_MIN,
-                             config.DEFAULT_MAX_TOKENS)
+        self.assertLessEqual(config.MAX_TOKENS_MIN, config.DEFAULT_MAX_TOKENS)
         self.assertLessEqual(config.DEFAULT_MAX_TOKENS,
                              config.MAX_TOKENS_LIMIT)
         self.assertIsInstance(config.DEFAULT_MAX_TOKENS, int)

@@ -28,14 +28,14 @@ if str(PROJECT_ROOT) not in sys.path:
 FAKE_KEY = 'demo-key-not-real'
 
 
-def title(text):
+def print_heading(text):
     print()
     print('=' * 70)
     print(f' {text}')
     print('=' * 70)
 
 
-def show(label, func, *args, **kwargs):
+def show_result(label, func, *args, **kwargs):
     """함수를 실행해 결과를 보여 준다. TODO/오류는 안내만 하고 계속한다."""
     print(f'\n>>> {label}')
     try:
@@ -70,7 +70,7 @@ def ensure_practice_repo(scenario='feature'):
 # ---------------------------------------------------------------------------
 def demo_step1(extra):
     from ai_gitgen import cli
-    title('Step 1 · build_parser() / validate_options()')
+    print_heading('Step 1 · build_parser() / validate_options()')
     samples = [extra] if extra else [
         ['commit'],
         ['pr', '--model', 'my-model', '--temperature', '0.7',
@@ -80,54 +80,56 @@ def demo_step1(extra):
         [],
     ]
     for argv in samples:
-        args = show(f'build_parser().parse_args({argv})',
-                    lambda a=argv: cli.build_parser().parse_args(a))
+        args = show_result(f'build_parser().parse_args({argv})',
+                           lambda a=argv: cli.build_parser().parse_args(a))
         if args is not None:
-            show('validate_options(args)', cli.validate_options, args)
+            show_result('validate_options(args)', cli.validate_options, args)
 
 
 def demo_step2(_extra):
     from ai_gitgen import git_collector as gc
-    title('Step 2 · Git 변경 사항 수집')
-    show('parse_status_output(practice_data/git_status_sample.txt)',
-         gc.parse_status_output, read_practice_file('git_status_sample.txt'))
+    print_heading('Step 2 · Git 변경 사항 수집')
+    status_text = read_practice_file('git_status_sample.txt')
+    show_result('parse_status_output(practice_data/git_status_sample.txt)',
+                gc.parse_status_output, status_text)
     repo = ensure_practice_repo()
     print(f'\n[INFO] 아래는 연습 저장소({repo})에서 실행한 결과입니다.')
-    show("run_git(['--version'])", gc.run_git, ['--version'])
-    show('is_git_repository(연습 저장소)', gc.is_git_repository, repo)
+    show_result("run_git(['--version'])", gc.run_git, ['--version'])
+    show_result('is_git_repository(연습 저장소)', gc.is_git_repository, repo)
     with tempfile.TemporaryDirectory() as empty_dir, \
             mock.patch.dict(os.environ, {'GIT_CEILING_DIRECTORIES':
                                          os.path.dirname(empty_dir)}):
-        show('is_git_repository(빈 임시 폴더)', gc.is_git_repository,
-             empty_dir)
-    show('get_current_branch()', gc.get_current_branch, repo)
-    show('get_changed_files()', gc.get_changed_files, repo)
-    diff = show('get_diff()', gc.get_diff, repo)
+        show_result('is_git_repository(빈 임시 폴더)', gc.is_git_repository,
+                    empty_dir)
+    show_result('get_current_branch()', gc.get_current_branch, repo)
+    show_result('get_changed_files()', gc.get_changed_files, repo)
+    diff = show_result('get_diff()', gc.get_diff, repo)
     if diff is not None:
-        show('count_diff_lines(diff)', gc.count_diff_lines, diff)
+        show_result('count_diff_lines(diff)', gc.count_diff_lines, diff)
 
 
 def demo_step3(_extra):
     from ai_gitgen import safety
-    title('Step 3 · 안전 모드 (마스킹 / 전송 제한)')
+    print_heading('Step 3 · 안전 모드 (마스킹 / 전송 제한)')
     secret_diff = read_practice_file('git_diff_with_secrets.diff')
     print('\n[원본] practice_data/git_diff_with_secrets.diff')
     print(secret_diff)
-    show('mask_sensitive(원본)', safety.mask_sensitive, secret_diff)
+    show_result('mask_sensitive(원본)', safety.mask_sensitive, secret_diff)
 
     big = ''.join(
         f'diff --git a/f{n}.py b/f{n}.py\n' + ''.join(
             f'+line {i}\n' for i in range(30))
         for n in range(15))
     print(f'\n[원본] 가짜 큰 diff: 파일 15개, {len(big.splitlines())}줄')
-    limited = show('limit_diff(큰 diff) 의 앞 5줄과 끝 3줄만 표시',
-                   lambda: _head_tail(safety.limit_diff(big)))
+    limited = show_result('limit_diff(큰 diff) 의 앞 5줄과 끝 3줄만 표시',
+                          lambda: _head_tail(safety.limit_diff(big)))
     if limited is not None:
         result = safety.limit_diff(big)
         print(f'  -> 결과 줄 수: {len(result.splitlines())}, '
               f"파일 수: {result.count('diff --git ')}")
-    show('apply_safe_mode(원본, enabled=False) 가 원본과 같은가?',
-         lambda: safety.apply_safe_mode(secret_diff, False) == secret_diff)
+    show_result('apply_safe_mode(원본, enabled=False) 가 원본과 같은가?',
+                lambda: safety.apply_safe_mode(secret_diff, False)
+                == secret_diff)
 
 
 def _head_tail(text):
@@ -138,7 +140,7 @@ def _head_tail(text):
 def demo_step4(_extra):
     from ai_gitgen import git_collector as gc
     from ai_gitgen import prompt_builder as pb
-    title('Step 4 · 프롬프트 만들기')
+    print_heading('Step 4 · 프롬프트 만들기')
     try:
         files = gc.parse_status_output(
             read_practice_file('git_status_sample.txt'))[:3]
@@ -148,11 +150,11 @@ def demo_step4(_extra):
                  {'code': 'A', 'path': 'todo_app/search.py'}]
         print('[INFO] Step 2 가 아직이라 파일 목록은 미리 정한 값을 씁니다.')
     diff = read_practice_file('git_diff_sample.diff')
-    show('format_file_list(files)', pb.format_file_list, files)
-    commit = show('build_commit_prompt(files, diff)',
-                  pb.build_commit_prompt, files, diff)
-    pr = show("build_pr_prompt(files, diff, 'feature/add-search')",
-              pb.build_pr_prompt, files, diff, 'feature/add-search')
+    show_result('format_file_list(files)', pb.format_file_list, files)
+    commit = show_result('build_commit_prompt(files, diff)',
+                         pb.build_commit_prompt, files, diff)
+    pr = show_result("build_pr_prompt(files, diff, 'feature/add-search')",
+                     pb.build_pr_prompt, files, diff, 'feature/add-search')
     for name, prompt in (('커밋', commit), ('PR', pr)):
         if prompt:
             print(f'\n[INFO] {name} 프롬프트: {len(prompt)}글자, '
@@ -163,20 +165,21 @@ def demo_step4(_extra):
 def demo_step5(_extra):
     from ai_gitgen import ai_client, config
     from learning_kit.fake_ai import FakeTransport
-    title('Step 5 · AI API 요청/응답 (가짜 AI 사용, 실제 호출 없음)')
-    show('build_headers(가짜키)', ai_client.build_headers, FAKE_KEY)
-    show("build_request_body('안녕', model, 0.3, 300)",
-         ai_client.build_request_body, '안녕', config.DEFAULT_MODEL,
-         0.3, 300)
+    print_heading('Step 5 · AI API 요청/응답 (가짜 AI 사용, 실제 호출 없음)')
+    show_result('build_headers(가짜키)', ai_client.build_headers, FAKE_KEY)
+    show_result("build_request_body('안녕', model, 0.3, 300)",
+                ai_client.build_request_body, '안녕', config.DEFAULT_MODEL,
+                0.3, 300)
     response = json.loads(read_practice_file(
         'api_responses/anthropic_commit.json'))
-    show('extract_text(anthropic_commit.json)', ai_client.extract_text,
-         response)
+    show_result('extract_text(anthropic_commit.json)', ai_client.extract_text,
+                response)
 
     fake = FakeTransport()
-    show('call_ai_api(..., api_key=가짜키, transport=FakeTransport())',
-         ai_client.call_ai_api, '커밋 메시지를 만들어 줘',
-         config.DEFAULT_MODEL, 0.3, 300, api_key=FAKE_KEY, transport=fake)
+    show_result('call_ai_api(..., api_key=가짜키, transport=FakeTransport())',
+                ai_client.call_ai_api, '커밋 메시지를 만들어 줘',
+                config.DEFAULT_MODEL, 0.3, 300, api_key=FAKE_KEY,
+                transport=fake)
     print(f'\n[INFO] 가짜 AI 호출 횟수: {fake.call_count}')
     if fake.calls:
         call = fake.calls[0]
@@ -189,13 +192,13 @@ def demo_step5(_extra):
 
     with mock.patch.dict(os.environ, {}, clear=False):
         os.environ.pop('AI_API_KEY', None)
-        show('get_api_key()  (환경변수 없음 -> MissingApiKeyError 예상)',
-             _expect_error, ai_client.get_api_key)
+        show_result('get_api_key()  (환경변수 없음 -> MissingApiKeyError 예상)',
+                    _expect_error, ai_client.get_api_key)
     error = ai_client.AIClientError('AI API 요청 실패 (HTTP 401): '
                                     'invalid x-api-key')
-    show('call_ai_api(...) with 401 흉내 -> AIClientError 예상',
-         _expect_error, ai_client.call_ai_api, 'x', 'm', 0.3, 10,
-         api_key=FAKE_KEY, transport=FakeTransport(error=error))
+    show_result('call_ai_api(...) with 401 흉내 -> AIClientError 예상',
+                _expect_error, ai_client.call_ai_api, 'x', 'm', 0.3, 10,
+                api_key=FAKE_KEY, transport=FakeTransport(error=error))
 
 
 def _expect_error(func, *args, **kwargs):
@@ -212,34 +215,34 @@ def demo_step6(_extra):
     from ai_gitgen import formatter as fm
     from learning_kit.fake_ai import FAKE_LONG_TITLE_TEXT, FAKE_PR_TEXT
     from learning_kit.fake_ai import FAKE_BROKEN_PR_TEXT, FAKE_COMMIT_TEXT
-    title('Step 6 · 출력 검증과 다듬기')
-    show('split_title_body(FAKE_COMMIT_TEXT)', fm.split_title_body,
-         FAKE_COMMIT_TEXT)
+    print_heading('Step 6 · 출력 검증과 다듬기')
+    show_result('split_title_body(FAKE_COMMIT_TEXT)', fm.split_title_body,
+                FAKE_COMMIT_TEXT)
     long_title = FAKE_LONG_TITLE_TEXT.splitlines()[0]
     print(f'\n[INFO] 긴 제목 길이: {len(long_title)}글자')
-    short = show('shorten_title(긴 제목, 72)', fm.shorten_title,
-                 long_title, 72)
+    short = show_result('shorten_title(긴 제목, 72)', fm.shorten_title,
+                        long_title, 72)
     if isinstance(short, str):
         print(f'  -> 줄인 뒤 길이: {len(short)}글자')
-    show('validate_commit_message(FAKE_COMMIT_TEXT)',
-         fm.validate_commit_message, FAKE_COMMIT_TEXT)
-    show('validate_commit_message(긴 제목 메시지)',
-         fm.validate_commit_message, FAKE_LONG_TITLE_TEXT)
+    show_result('validate_commit_message(FAKE_COMMIT_TEXT)',
+                fm.validate_commit_message, FAKE_COMMIT_TEXT)
+    show_result('validate_commit_message(긴 제목 메시지)',
+                fm.validate_commit_message, FAKE_LONG_TITLE_TEXT)
     pr_body = FAKE_PR_TEXT.split('\n', 1)[1].strip()
-    show('validate_pr_body(정상 PR 본문)', fm.validate_pr_body, pr_body)
+    show_result('validate_pr_body(정상 PR 본문)', fm.validate_pr_body, pr_body)
     broken = FAKE_BROKEN_PR_TEXT.split('\n', 1)[1].strip()
-    show('validate_pr_body(섹션 빠진 본문)', fm.validate_pr_body, broken)
-    show('format_commit_output(FAKE_COMMIT_TEXT)',
-         fm.format_commit_output, FAKE_COMMIT_TEXT)
-    show('format_pr_output(제목, 본문)', fm.format_pr_output,
-         FAKE_PR_TEXT.splitlines()[0], pr_body)
+    show_result('validate_pr_body(섹션 빠진 본문)', fm.validate_pr_body, broken)
+    show_result('format_commit_output(FAKE_COMMIT_TEXT)',
+                fm.format_commit_output, FAKE_COMMIT_TEXT)
+    show_result('format_pr_output(제목, 본문)', fm.format_pr_output,
+                FAKE_PR_TEXT.splitlines()[0], pr_body)
 
 
 def demo_step7(extra):
     from ai_gitgen import cli
     from learning_kit.fake_ai import FakeTransport
     from learning_kit.practice_repo import create_practice_repo
-    title('Step 7 · 전체 흐름 모의 실행 (가짜 AI, 임시 연습 저장소)')
+    print_heading('Step 7 · 전체 흐름 모의 실행 (가짜 AI, 임시 연습 저장소)')
     with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
         cases = [
             ('feature', ['commit'] + extra, True),
@@ -257,8 +260,8 @@ def demo_step7(extra):
                 os.environ.pop('AI_API_KEY', None)
                 if with_key:
                     os.environ['AI_API_KEY'] = FAKE_KEY
-                code = show('main(...) 실행 결과(종료 코드)', cli.main,
-                            argv, cwd=str(repo), transport=fake)
+                code = show_result('main(...) 실행 결과(종료 코드)', cli.main,
+                                   argv, cwd=str(repo), transport=fake)
             print(f'[INFO] 종료 코드={code}, 가짜 AI 호출 횟수='
                   f'{fake.call_count}')
             if scenario == 'secret' and fake.calls:
@@ -270,7 +273,7 @@ def demo_step7(extra):
 def demo_step8(_extra):
     from tests.practice.test_step8_readme import README_RECOMMENDED
     from tests.practice.test_step8_readme import README_REQUIREMENTS
-    title('Step 8 · README 제출 기준 점검')
+    print_heading('Step 8 · README 제출 기준 점검')
     readme = (PROJECT_ROOT / 'README.md').read_text(encoding='utf-8')
     if 'TODO(Step 8)' in readme:
         print('[TODO] README.md 에 아직 TODO(Step 8) 표시가 있습니다.')
