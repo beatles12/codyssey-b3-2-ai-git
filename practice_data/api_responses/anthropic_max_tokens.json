@@ -1,0 +1,17 @@
+{
+  "id": "msg_fake_0001",
+  "type": "message",
+  "role": "assistant",
+  "model": "fake-model",
+  "content": [
+    {
+      "type": "text",
+      "text": "feat: 할 일 검색 기능"
+    }
+  ],
+  "stop_reason": "max_tokens",
+  "usage": {
+    "input_tokens": 321,
+    "output_tokens": 54
+  }
+}

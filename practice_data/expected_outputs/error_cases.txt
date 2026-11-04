@@ -1,0 +1,20 @@
+# [참고 예시 — 정답 아님] 오류·예외 상황 화면
+
+## 1) API Key 가 없을 때  (python main.py commit)
+[ERROR] AI_API_KEY 환경변수가 설정되지 않았습니다.
+예) export AI_API_KEY="YOUR_KEY"
+
+## 2) 변경 사항이 없을 때  (python main.py commit)
+[INFO] 변경 사항이 없습니다. 커밋 메시지를 생성하지 않고 종료합니다.
+
+## 3) Git 저장소가 아닌 폴더에서 실행했을 때
+[ERROR] Git 저장소가 아닙니다. 프로젝트 루트(.git 이 있는 폴더)에서 실행하세요.
+
+## 4) 옵션 값이 범위를 벗어났을 때  (python main.py commit --temperature 5)
+[ERROR] temperature 는 0.0 ~ 1.0 사이여야 합니다. (입력값: 5.0)
+
+## 5) 인증 실패 (잘못된 키)
+[ERROR] AI API 요청 실패 (HTTP 401): invalid x-api-key
+
+## 6) 네트워크 오류 (인터넷 연결 끊김 등)
+[ERROR] 네트워크 오류로 AI API 에 연결하지 못했습니다: [Errno -3] Temporary failure in name resolution

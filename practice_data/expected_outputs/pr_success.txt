@@ -1,0 +1,24 @@
+# [참고 예시 — 정답 아님] python main.py pr 정상 실행 화면
+# 확인할 것: 현재 브랜치 로그, PR Title(80자 이하 1줄), PR Body 의 Why/What/How to Test + 섹션별 불릿
+
+[INFO] 현재 브랜치: feature/add-search
+[INFO] Git status 수집 완료: 3개 파일 변경 감지
+[INFO] Git diff 수집 완료: 46줄
+[INFO] AI API 요청 중... (이번 실행 1번째 호출)
+[DONE] PR 초안 생성 완료 (API 호출 1회)
+
+--- PR Title ---
+feat: 할 일 검색 기능 추가
+
+--- PR Body ---
+## Why
+- 할 일이 많아지면 원하는 항목을 찾기 어려워 검색 기능이 필요했습니다.
+
+## What
+- todo_app/search.py 에 키워드로 제목을 찾는 search_todos() 추가
+- README 에 검색 사용 예시 추가
+
+## How to Test
+- 할 일 2개를 추가한 뒤 search_todos("우유") 결과를 확인합니다.
+- python main.py pr 출력이 Why/What/How to Test 구조인지 확인합니다.
+----------------------------------------

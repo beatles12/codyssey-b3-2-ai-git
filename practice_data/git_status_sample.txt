@@ -1,0 +1,7 @@
+M  README.md
+ M todo_app/app.py
+A  todo_app/search.py
+MM todo_app/settings.py
+D  old_script.py
+R  docs/old_guide.md -> docs/guide.md
+?? NOTES.md

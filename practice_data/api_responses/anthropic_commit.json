@@ -1,0 +1,22 @@
+{
+  "id": "msg_fake_0001",
+  "type": "message",
+  "role": "assistant",
+  "model": "fake-model",
+  "content": [
+    {
+      "type": "thinking",
+      "thinking": "",
+      "signature": "fake-signature"
+    },
+    {
+      "type": "text",
+      "text": "feat: 할 일 검색 기능 추가\n\n- todo_app/search.py 에 제목 키워드 검색 함수 추가\n- README 에 검색 사용 예시 추가"
+    }
+  ],
+  "stop_reason": "end_turn",
+  "usage": {
+    "input_tokens": 321,
+    "output_tokens": 54
+  }
+}

@@ -1,0 +1,46 @@
+diff --git a/README.md b/README.md
+index 6f69fdc..3b17e98 100644
+--- a/README.md
++++ b/README.md
+@@ -6,3 +6,4 @@
+ 
+ - add_todo("우유 사기")
+ - list_todos()
++- search_todos("우유")
+diff --git a/todo_app/search.py b/todo_app/search.py
+new file mode 100644
+index 0000000..6dd01e0
+--- /dev/null
++++ b/todo_app/search.py
+@@ -0,0 +1,10 @@
++"""할 일 검색 기능."""
++
++from todo_app.app import list_todos
++
++
++def search_todos(keyword):
++    """제목에 keyword 가 들어간 할 일만 돌려준다."""
++    keyword = keyword.strip().lower()
++    return [todo for todo in list_todos()
++            if keyword in todo['title'].lower()]
+diff --git a/todo_app/app.py b/todo_app/app.py
+index 879ac9a..1885bb7 100644
+--- a/todo_app/app.py
++++ b/todo_app/app.py
+@@ -5,10 +5,15 @@ TODOS = []
+ 
+ def add_todo(title):
+     """할 일을 추가하고 전체 개수를 돌려준다."""
+-    TODOS.append({'title': title, 'done': False})
++    TODOS.append({'title': title.strip(), 'done': False})
+     return len(TODOS)
+ 
+ 
+ def list_todos():
+     """할 일 목록을 돌려준다."""
+     return list(TODOS)
++
++
++def complete_todo(index):
++    """index 번째 할 일을 완료로 표시한다."""
++    TODOS[index]['done'] = True

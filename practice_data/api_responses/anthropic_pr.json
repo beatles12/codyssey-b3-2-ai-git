@@ -1,0 +1,22 @@
+{
+  "id": "msg_fake_0001",
+  "type": "message",
+  "role": "assistant",
+  "model": "fake-model",
+  "content": [
+    {
+      "type": "thinking",
+      "thinking": "",
+      "signature": "fake-signature"
+    },
+    {
+      "type": "text",
+      "text": "feat: 할 일 검색 기능 추가\n\n## Why\n- 할 일이 많아지면 원하는 항목을 찾기 어려워 검색 기능이 필요했습니다.\n\n## What\n- todo_app/search.py 에 키워드로 제목을 찾는 search_todos() 추가\n- README 에 검색 사용 예시 추가\n\n## How to Test\n- 할 일 2개를 추가한 뒤 search_todos(\"우유\") 결과를 확인합니다.\n- python main.py pr 출력이 Why/What/How to Test 구조인지 확인합니다."
+    }
+  ],
+  "stop_reason": "end_turn",
+  "usage": {
+    "input_tokens": 321,
+    "output_tokens": 54
+  }
+}

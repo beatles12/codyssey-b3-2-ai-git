@@ -1,0 +1,7 @@
+{
+  "type": "error",
+  "error": {
+    "type": "rate_limit_error",
+    "message": "(예시) 요청이 너무 많습니다. 잠시 후 다시 시도하세요."
+  }
+}
