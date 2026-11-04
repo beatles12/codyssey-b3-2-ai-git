@@ -5,6 +5,11 @@
 실제 AI API 는 절대 부르지 않는다.
     - transport 테스트: learning_kit.fake_ai.FakeTransport 사용
     - send_http_request 테스트: urllib.request.urlopen 을 가짜로 바꿔 끼움
+
+제공자(provider) 형식
+    - 필수 테스트는 config.DEFAULT_PROVIDER 에 고른 제공자 형식만 확인한다.
+    - 다른 제공자 형식은 (선택) 테스트다. 공식 미션은 AI API 1개면 충분하다.
+    - 이 테스트가 아는 형식은 anthropic, openai 두 가지다.
 """
 
 import io
@@ -16,10 +21,17 @@ from unittest import mock
 
 from ai_gitgen import ai_client, config
 from learning_kit.fake_ai import FAKE_COMMIT_TEXT, FAKE_PR_TEXT
-from learning_kit.fake_ai import FakeTransport
+from learning_kit.fake_ai import FakeTransport, make_anthropic_response
+from learning_kit.fake_ai import make_openai_response
 from tests.helpers import FAKE_KEY, PracticeTestCase
 
 URL = 'https://api.example.com/v1/test'
+
+SUPPORTED = ('anthropic', 'openai')
+PROVIDER = config.DEFAULT_PROVIDER
+OTHER = 'openai' if PROVIDER == 'anthropic' else 'anthropic'
+COMMIT_FIXTURE = {'anthropic': 'anthropic_commit',
+                  'openai': 'openai_commit'}
 
 
 class FakeHTTPResponse:
@@ -56,6 +68,52 @@ def lower_keys(headers):
     return {str(key).lower(): value for key, value in headers.items()}
 
 
+def make_response(text, provider):
+    if provider == 'openai':
+        return make_openai_response(text)
+    return make_anthropic_response(text)
+
+
+def max_tokens_of(body, provider):
+    """요청 본문의 출력 길이 상한 값.
+
+    openai 형식은 최신 모델용 이름 max_completion_tokens 도 인정한다.
+    """
+    if provider == 'openai' and 'max_completion_tokens' in body:
+        return body['max_completion_tokens']
+    return body['max_tokens']
+
+
+class ProviderTestCase(PracticeTestCase):
+    """제공자별 기대값을 모아 둔 부모 클래스."""
+
+    def setUp(self):
+        super().setUp()
+        if PROVIDER not in SUPPORTED:
+            self.skipTest(f'config.DEFAULT_PROVIDER={PROVIDER!r} 형식은 이 '
+                          '연습 테스트가 모릅니다. (anthropic / openai)')
+
+    def check_headers(self, headers, provider):
+        headers = lower_keys(headers)
+        if provider == 'anthropic':
+            self.assertEqual(headers['x-api-key'], FAKE_KEY)
+            self.assertEqual(headers['anthropic-version'],
+                             config.PROVIDERS['anthropic']['api_version'])
+        else:
+            self.assertEqual(headers['authorization'], f'Bearer {FAKE_KEY}')
+        self.assertIn('application/json', headers['content-type'])
+
+    def load(self, name):
+        return json.loads(self.read_data(f'api_responses/{name}.json'))
+
+    def bad_shapes(self, provider):
+        if provider == 'anthropic':
+            return [{}, {'content': []},
+                    {'content': [{'type': 'thinking', 'thinking': ''}]},
+                    self.load('anthropic_error_401')]
+        return [{}, {'choices': []}, {'error': {'message': 'bad'}}]
+
+
 class GetApiKeyTest(PracticeTestCase):
 
     def test_reads_from_environment(self):
@@ -81,21 +139,16 @@ class GetApiKeyTest(PracticeTestCase):
         self.assertEqual(ai_client.get_api_key('B3_TEST_KEY_NAME'), FAKE_KEY)
 
 
-class HeadersTest(PracticeTestCase):
+class HeadersTest(ProviderTestCase):
 
-    def test_anthropic_headers(self):
-        """anthropic: x-api-key, anthropic-version, content-type"""
-        headers = lower_keys(ai_client.build_headers(FAKE_KEY, 'anthropic'))
-        self.assertEqual(headers['x-api-key'], FAKE_KEY)
-        self.assertEqual(headers['anthropic-version'],
-                         config.PROVIDERS['anthropic']['api_version'])
-        self.assertIn('application/json', headers['content-type'])
+    def test_default_provider_headers(self):
+        """기본 제공자 형식의 인증 헤더와 content-type 을 만든다"""
+        self.check_headers(ai_client.build_headers(FAKE_KEY, PROVIDER),
+                           PROVIDER)
 
-    def test_openai_headers(self):
-        """openai: Authorization: Bearer <키>"""
-        headers = lower_keys(ai_client.build_headers(FAKE_KEY, 'openai'))
-        self.assertEqual(headers['authorization'], f'Bearer {FAKE_KEY}')
-        self.assertIn('application/json', headers['content-type'])
+    def test_optional_other_provider_headers(self):
+        """(선택) 다른 제공자 형식의 헤더도 만든다"""
+        self.check_headers(ai_client.build_headers(FAKE_KEY, OTHER), OTHER)
 
     def test_unknown_provider(self):
         """모르는 제공자 이름은 AIClientError"""
@@ -103,13 +156,13 @@ class HeadersTest(PracticeTestCase):
             ai_client.build_headers(FAKE_KEY, 'no-such-provider')
 
 
-class RequestBodyTest(PracticeTestCase):
+class RequestBodyTest(ProviderTestCase):
 
     def test_common_body_shape(self):
         """model / max_tokens / temperature / messages 가 정확히 들어간다"""
-        body = ai_client.build_request_body('안녕', 'm-1', 0.3, 200)
+        body = ai_client.build_request_body('안녕', 'm-1', 0.3, 200, PROVIDER)
         self.assertEqual(body['model'], 'm-1')
-        self.assertEqual(body['max_tokens'], 200)
+        self.assertEqual(max_tokens_of(body, PROVIDER), 200)
         self.assertEqual(body['temperature'], 0.3)
         self.assertEqual(body['messages'],
                          [{'role': 'user', 'content': '안녕'}])
@@ -117,66 +170,56 @@ class RequestBodyTest(PracticeTestCase):
     def test_body_is_json_serializable(self):
         """본문을 JSON 문자열로 바꿀 수 있다 (한글 포함)"""
         body = ai_client.build_request_body('한글 프롬프트', 'm', 0.5, 10,
-                                            'openai')
+                                            PROVIDER)
         self.assertIn('한글 프롬프트', json.dumps(body, ensure_ascii=False))
 
     def test_optional_temperature_none_is_omitted(self):
         """(선택) temperature=None 이면 'temperature' 키를 넣지 않는다"""
-        body = ai_client.build_request_body('x', 'm', None, 10)
+        body = ai_client.build_request_body('x', 'm', None, 10, PROVIDER)
         self.assertNotIn('temperature', body)
 
 
-class ExtractTextTest(PracticeTestCase):
+class ExtractTextTest(ProviderTestCase):
 
-    def load(self, name):
-        return json.loads(self.read_data(f'api_responses/{name}.json'))
+    def test_default_provider_response(self):
+        """기본 제공자 응답에서 글자만 꺼낸다 (anthropic: thinking 블록 건너뛰기)"""
+        data = self.load(COMMIT_FIXTURE[PROVIDER])
+        self.assertEqual(ai_client.extract_text(data, PROVIDER),
+                         FAKE_COMMIT_TEXT)
 
-    def test_anthropic_skips_thinking_block(self):
-        """anthropic 응답: 앞의 thinking 블록을 건너뛰고 text 만 꺼낸다"""
-        text = ai_client.extract_text(self.load('anthropic_commit'),
-                                      'anthropic')
-        self.assertEqual(text, FAKE_COMMIT_TEXT)
+    def test_default_provider_pr_response(self):
+        """PR 초안 응답도 꺼낼 수 있다"""
+        data = make_response(FAKE_PR_TEXT, PROVIDER)
+        self.assertEqual(ai_client.extract_text(data, PROVIDER), FAKE_PR_TEXT)
 
-    def test_anthropic_pr_response(self):
-        """anthropic PR 응답도 꺼낼 수 있다"""
-        self.assertEqual(
-            ai_client.extract_text(self.load('anthropic_pr'), 'anthropic'),
-            FAKE_PR_TEXT)
+    def test_strips_whitespace(self):
+        """앞뒤 공백·빈 줄을 정리한다"""
+        data = make_response('\n  feat: x  \n\n', PROVIDER)
+        self.assertEqual(ai_client.extract_text(data, PROVIDER), 'feat: x')
 
-    def test_anthropic_multiple_text_blocks(self):
-        """text 블록이 여러 개면 모두 이어 붙인다"""
+    def test_unexpected_shapes_raise_client_error(self):
+        """모양이 다르거나 글자가 없으면 KeyError 가 아닌 AIClientError"""
+        for data in self.bad_shapes(PROVIDER):
+            with self.subTest(data=data):
+                with self.assertRaises(ai_client.AIClientError):
+                    ai_client.extract_text(data, PROVIDER)
+
+    def test_optional_anthropic_multiple_text_blocks(self):
+        """(선택) anthropic: text 블록이 여러 개면 모두 이어 붙인다"""
         data = {'content': [{'type': 'text', 'text': 'feat: 첫째'},
                             {'type': 'text', 'text': '- 둘째'}]}
         text = ai_client.extract_text(data, 'anthropic')
         self.assertIn('feat: 첫째', text)
         self.assertIn('- 둘째', text)
 
-    def test_openai_response(self):
-        """openai 응답: choices[0].message.content 를 꺼낸다"""
-        text = ai_client.extract_text(self.load('openai_commit'), 'openai')
-        self.assertEqual(text, FAKE_COMMIT_TEXT)
-
-    def test_strips_whitespace(self):
-        """앞뒤 공백·빈 줄을 정리한다"""
-        data = {'content': [{'type': 'text', 'text': '\n  feat: x  \n\n'}]}
-        self.assertEqual(ai_client.extract_text(data, 'anthropic'),
-                         'feat: x')
-
-    def test_unexpected_shapes_raise_client_error(self):
-        """모양이 다르거나 글자가 없으면 KeyError 가 아닌 AIClientError"""
-        cases = [
-            ({}, 'anthropic'),
-            ({'content': []}, 'anthropic'),
-            ({'content': [{'type': 'thinking', 'thinking': ''}]},
-             'anthropic'),
-            (self.load('anthropic_error_401'), 'anthropic'),
-            ({'choices': []}, 'openai'),
-            ({}, 'openai'),
-        ]
-        for data, provider in cases:
-            with self.subTest(data=data, provider=provider):
-                with self.assertRaises(ai_client.AIClientError):
-                    ai_client.extract_text(data, provider)
+    def test_optional_other_provider_response(self):
+        """(선택) 다른 제공자 응답도 꺼내고, 모양이 다르면 AIClientError"""
+        data = self.load(COMMIT_FIXTURE[OTHER])
+        self.assertEqual(ai_client.extract_text(data, OTHER),
+                         FAKE_COMMIT_TEXT)
+        for bad in self.bad_shapes(OTHER):
+            with self.assertRaises(ai_client.AIClientError):
+                ai_client.extract_text(bad, OTHER)
 
 
 class SendHttpRequestTest(PracticeTestCase):
@@ -251,11 +294,12 @@ class SendHttpRequestTest(PracticeTestCase):
         self.assertIn('invalid x-api-key', str(context.exception))
 
 
-class CallAiApiTest(PracticeTestCase):
+class CallAiApiTest(ProviderTestCase):
 
     def call(self, **kwargs):
         options = {'prompt': '커밋 메시지를 만들어 줘', 'model': 'm-1',
-                   'temperature': 0.2, 'max_tokens': 300}
+                   'temperature': 0.2, 'max_tokens': 300,
+                   'provider': PROVIDER}
         options.update(kwargs)
         return ai_client.call_ai_api(**options)
 
@@ -274,22 +318,21 @@ class CallAiApiTest(PracticeTestCase):
     def test_sends_correct_request(self):
         """올바른 주소·헤더·본문·timeout 으로 보낸다"""
         fake = FakeTransport()
-        self.call(api_key=FAKE_KEY, transport=fake, provider='anthropic')
+        self.call(api_key=FAKE_KEY, transport=fake)
         call = fake.calls[0]
-        self.assertEqual(call['url'], config.PROVIDERS['anthropic']['url'])
-        self.assertEqual(lower_keys(call['headers'])['x-api-key'], FAKE_KEY)
+        self.assertEqual(call['url'], config.PROVIDERS[PROVIDER]['url'])
+        self.check_headers(call['headers'], PROVIDER)
         self.assertEqual(call['body']['messages'][0]['content'],
                          '커밋 메시지를 만들어 줘')
-        self.assertEqual(call['body']['max_tokens'], 300)
+        self.assertEqual(max_tokens_of(call['body'], PROVIDER), 300)
         self.assertEqual(call['timeout'], config.REQUEST_TIMEOUT_SECONDS)
 
     def test_reads_key_from_environment(self):
         """api_key 를 안 주면 환경변수에서 읽는다"""
         os.environ['AI_API_KEY'] = FAKE_KEY
         fake = FakeTransport()
-        self.call(transport=fake, provider='anthropic')
-        self.assertEqual(lower_keys(fake.calls[0]['headers'])['x-api-key'],
-                         FAKE_KEY)
+        self.call(transport=fake)
+        self.check_headers(fake.calls[0]['headers'], PROVIDER)
 
     def test_missing_key_never_calls_api(self):
         """API Key 가 없으면 AI 를 부르지 않고 MissingApiKeyError"""
@@ -304,23 +347,22 @@ class CallAiApiTest(PracticeTestCase):
         with self.assertRaises(ai_client.AIClientError):
             self.call(api_key=FAKE_KEY, transport=FakeTransport(error=error))
 
-    def test_openai_provider(self):
-        """provider='openai' 면 openai 주소로 보내고 응답을 읽는다"""
-        fake = FakeTransport()
-        text = self.call(api_key=FAKE_KEY, transport=fake, provider='openai')
-        self.assertEqual(fake.calls[0]['url'],
-                         config.PROVIDERS['openai']['url'])
-        self.assertEqual(text, FAKE_COMMIT_TEXT)
-
     def test_default_transport_uses_send_http_request(self):
         """transport 를 안 주면 send_http_request(urlopen)를 쓴다"""
-        data = self.read_data('api_responses/anthropic_commit.json')
+        data = self.read_data(f'api_responses/{COMMIT_FIXTURE[PROVIDER]}.json')
         fake = FakeHTTPResponse(raw=data.encode('utf-8'))
         with mock.patch('urllib.request.urlopen',
                         return_value=fake) as urlopen:
-            text = self.call(api_key=FAKE_KEY, provider='anthropic')
+            text = self.call(api_key=FAKE_KEY)
         self.assertEqual(text, FAKE_COMMIT_TEXT)
         self.assertEqual(urlopen.call_count, 1)
+
+    def test_optional_other_provider(self):
+        """(선택) provider 를 바꾸면 그 제공자 주소로 보내고 응답을 읽는다"""
+        fake = FakeTransport()
+        text = self.call(api_key=FAKE_KEY, transport=fake, provider=OTHER)
+        self.assertEqual(fake.calls[0]['url'], config.PROVIDERS[OTHER]['url'])
+        self.assertEqual(text, FAKE_COMMIT_TEXT)
 
 
 if __name__ == '__main__':

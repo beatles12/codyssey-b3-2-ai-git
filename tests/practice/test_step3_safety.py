@@ -1,6 +1,9 @@
 """Step 3 연습 테스트 — 안전 모드: 마스킹·전송 제한 (ai_gitgen/safety.py)
 
 실행: python -m learning_kit.practice 3
+
+공식 제약은 (A) 마스킹 / (B) 일부만 전송 중 "1개 이상"이다.
+이 실습은 (A) 마스킹을 필수로, (B) 전송 제한을 (선택)으로 둔다.
 """
 
 import unittest
@@ -26,12 +29,15 @@ class MaskTest(PracticeTestCase):
 
     def test_api_key_is_masked(self):
         """'sk-' 로 시작하는 API Key 모양 문자열이 사라진다"""
-        masked = safety.mask_sensitive('token: sk-fake-abcdefghijklmnop1234')
+        # 앞에 api_key= 같은 이름이 없어도 키 모양만으로 찾아야 한다.
+        masked = safety.mask_sensitive(
+            'curl -H "Bearer sk-fake-abcdefghijklmnop1234" ...')
         self.assertNotIn('sk-fake-abcdefghijklmnop1234', masked)
         self.assertIn(safety.MASK_TEXT, masked)
+        self.assertIn('curl -H', masked)
 
-    def test_assigned_secret_values_are_masked(self):
-        """API_KEY = "..." / DB_PASSWORD = "..." 같은 대입 값이 사라진다"""
+    def test_optional_assigned_secret_values_are_masked(self):
+        """(선택) API_KEY = "..." / DB_PASSWORD = "..." 같은 대입 값도 가린다"""
         masked = safety.mask_sensitive(
             'API_KEY = "my-fake-key-value-1"\n'
             'DB_PASSWORD = "fake-password-1234"\n'
@@ -49,10 +55,10 @@ class MaskTest(PracticeTestCase):
         self.assertIn('입니다', masked)
 
     def test_sample_diff_has_no_secrets_after_masking(self):
-        """git_diff_with_secrets.diff 의 가짜 키·이메일·비밀번호가 모두 사라진다"""
+        """git_diff_with_secrets.diff 의 가짜 API Key·이메일이 사라진다"""
         masked = safety.mask_sensitive(self.diff)
         for secret in ('sk-fake-practice-0000000000abcdef',
-                       'admin@example.com', 'fake-password-1234'):
+                       'admin@example.com'):
             with self.subTest(secret=secret):
                 self.assertNotIn(secret, masked)
 
@@ -78,26 +84,26 @@ class MaskTest(PracticeTestCase):
 
 class LimitDiffTest(PracticeTestCase):
 
-    def test_small_diff_is_unchanged(self):
-        """제한보다 작은 diff 는 그대로 돌려준다"""
+    def test_optional_small_diff_is_unchanged(self):
+        """(선택) 제한보다 작은 diff 는 그대로 돌려준다"""
         diff = self.read_data('git_diff_sample.diff')
         self.assertEqual(safety.limit_diff(diff), diff)
 
-    def test_limits_number_of_files(self):
-        """파일 15개 diff -> 최대 10개 파일만 남는다"""
+    def test_optional_limits_number_of_files(self):
+        """(선택) 파일 15개 diff -> 최대 10개 파일만 남는다"""
         result = safety.limit_diff(make_big_diff(files=15, lines_per_file=3))
         self.assertLessEqual(result.count('diff --git '), 10)
         self.assertIn('diff --git a/f0.py', result)
 
-    def test_limits_number_of_lines(self):
-        """300줄이 넘는 diff -> 200줄 + 안내 1줄 이하로 줄어든다"""
+    def test_optional_limits_number_of_lines(self):
+        """(선택) 300줄이 넘는 diff -> 200줄 + 안내 1줄 이하로 줄어든다"""
         big = make_big_diff(files=5, lines_per_file=80)
         result = safety.limit_diff(big)
         self.assertLessEqual(len(result.splitlines()), 201)
         self.assertTrue(big.startswith(result.splitlines()[0]))
 
-    def test_custom_limits(self):
-        """max_files / max_lines 값을 바꿔 줄 수 있다"""
+    def test_optional_custom_limits(self):
+        """(선택) max_files / max_lines 값을 바꿔 줄 수 있다"""
         result = safety.limit_diff(make_big_diff(), max_files=2,
                                    max_lines=20)
         self.assertLessEqual(result.count('diff --git '), 2)
@@ -118,8 +124,15 @@ class ApplySafeModeTest(PracticeTestCase):
         diff = self.read_data('git_diff_with_secrets.diff')
         self.assertEqual(safety.apply_safe_mode(diff, False), diff)
 
-    def test_enabled_masks_and_limits(self):
-        """enabled=True 면 마스킹과 전송 제한이 모두 적용된다"""
+    def test_enabled_masks(self):
+        """enabled=True 면 마스킹이 적용된다"""
+        diff = self.read_data('git_diff_with_secrets.diff')
+        result = safety.apply_safe_mode(diff, True)
+        self.assertNotIn('sk-fake-practice', result)
+        self.assertNotIn('admin@example.com', result)
+
+    def test_optional_enabled_limits(self):
+        """(선택) enabled=True 면 전송 제한도 적용된다"""
         diff = self.read_data('git_diff_with_secrets.diff') + make_big_diff()
         result = safety.apply_safe_mode(diff, True)
         self.assertNotIn('sk-fake-practice', result)

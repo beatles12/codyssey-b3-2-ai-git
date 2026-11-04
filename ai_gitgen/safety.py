@@ -7,7 +7,8 @@
     프롬프트에 포함하지 않도록 주의한다. 아래 중 1개 이상을 제공한다.
         (A) 특정 패턴(API Key 형태, 이메일 등)을 마스킹한 뒤 전송
         (B) diff 일부만 전송 (예: 최대 10개 파일, 최대 200줄)
-    이 실습에서는 (A)와 (B)를 모두 연습한다.
+    이 실습에서는 (A) 마스킹이 필수, (B) 전송 제한은 [선택]이다.
+    (공식 기준은 "1개 이상"이므로 (A)만으로 충분하다.)
 
 [자주 쓰는 표준 라이브러리]
     re : 정규표현식(문자열 패턴 찾기/바꾸기)
@@ -21,14 +22,15 @@ from ai_gitgen import config  # noqa: F401  (Step 3 에서 사용합니다)
 MASK_TEXT = '[MASKED]'
 
 # 🧩 Step 3 — 가릴 패턴 목록을 직접 채우세요.
-#   형식: (이름, 정규표현식 문자열) 튜플의 리스트
-#   최소한 다음 세 가지를 가려야 테스트를 통과합니다.
+#   형식: (이름, 정규표현식 문자열) 튜플의 리스트 (권장 형식, 바꿔도 됨)
+#   필수 테스트를 통과하려면 공식 예시에 나온 두 가지를 가려야 합니다.
 #     1) 'sk-' 로 시작하는 긴 API Key 모양 문자열
-#     2) api_key / secret / token / password 같은 이름 뒤에 = 또는 : 로
-#        이어지는 값  (예: API_KEY = "...", DB_PASSWORD = "...",
-#        secret: '...')  — 대문자/소문자 모두
-#     3) 이메일 주소
-#   선택: 휴대전화 번호(010-1234-5678 형태)
+#     2) 이메일 주소
+#   [선택] 더 가리면 좋은 것
+#     - api_key / secret / token / password 같은 이름 뒤에 = 또는 : 로
+#       이어지는 값  (예: API_KEY = "...", DB_PASSWORD = "...",
+#       secret: '...')  — 대문자/소문자 모두
+#     - 휴대전화 번호(010-1234-5678 형태)
 SENSITIVE_PATTERNS = [
     # TODO(Step 3): 예) ('이름', r'정규표현식'),
 ]
@@ -49,7 +51,10 @@ def mask_sensitive(text):
 
 def limit_diff(diff_text, max_files=config.SAFE_MODE_MAX_FILES,
                max_lines=config.SAFE_MODE_MAX_LINES):
-    """diff 를 앞에서부터 최대 max_files 개 파일, 최대 max_lines 줄로 자른다.
+    """[선택] diff 를 앞에서부터 최대 max_files 개 파일, max_lines 줄로 자른다.
+
+    공식 제약 (B). 구현하지 않기로 했다면 이 함수는 그대로 두고,
+    apply_safe_mode() 에서 부르지 않으면 된다.
 
     규칙
         - 파일 하나의 diff 는 'diff --git ' 으로 시작하는 줄부터 시작한다.
@@ -67,7 +72,10 @@ def limit_diff(diff_text, max_files=config.SAFE_MODE_MAX_FILES,
 
 
 def apply_safe_mode(diff_text, enabled=True):
-    """enabled 가 True 면 마스킹과 전송 제한을 적용하고, False 면 그대로 둔다.
+    """enabled 가 True 면 안전 처리를 적용하고, False 면 그대로 둔다.
+
+    - 필수: mask_sensitive() 로 마스킹 (A)
+    - 선택: limit_diff() 를 구현했다면 전송 제한 (B) 도 적용
 
     반환값
         str : AI 에게 보낼 diff 텍스트

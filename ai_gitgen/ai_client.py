@@ -67,6 +67,9 @@ def get_api_key(env_name=config.API_KEY_ENV_NAME):
 def build_headers(api_key, provider=config.DEFAULT_PROVIDER):
     """제공자 형식에 맞는 HTTP 요청 머리(headers) 사전을 만든다.
 
+    필수 테스트는 config.DEFAULT_PROVIDER 형식만 확인한다.
+    다른 제공자 형식까지 만드는 것은 [선택]이다.
+
     anthropic 형식
         x-api-key         : api_key
         anthropic-version : config.PROVIDERS['anthropic']['api_version']
@@ -96,6 +99,10 @@ def build_request_body(prompt, model, temperature, max_tokens,
 
     [선택] temperature 가 None 이면 'temperature' 키를 아예 넣지 않는다.
     (temperature 를 받지 않는 모델을 쓸 때 유용하다.)
+
+    [참고] openai 의 일부 최신(추론) 모델은 max_tokens 대신
+    max_completion_tokens 라는 이름을 요구한다. openai 형식에서는 테스트가
+    두 이름을 모두 인정한다. 쓰려는 모델의 공식 문서를 확인하자.
     """
     # TODO(Step 5): 아래 줄을 지우고 직접 구현하세요.
     raise NotImplementedError('Step 5 - ai_client.build_request_body()')
@@ -103,6 +110,8 @@ def build_request_body(prompt, model, temperature, max_tokens,
 
 def extract_text(response_data, provider=config.DEFAULT_PROVIDER):
     """응답 JSON(사전)에서 AI 가 만든 글자만 꺼내 돌려준다.
+
+    필수 테스트는 config.DEFAULT_PROVIDER 형식만 확인한다. (다른 형식은 선택)
 
     anthropic 응답 모양 (content 는 "목록"이다)
         {'content': [{'type': 'thinking', ...},

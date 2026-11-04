@@ -15,8 +15,8 @@ import os
 import unittest
 
 from ai_gitgen import cli, config
-from learning_kit.fake_ai import FAKE_LONG_TITLE_TEXT, FAKE_PR_TEXT
-from learning_kit.fake_ai import FakeTransport
+from learning_kit.fake_ai import FAKE_COMMIT_TEXT, FAKE_LONG_TITLE_TEXT
+from learning_kit.fake_ai import FAKE_PR_TEXT, FakeTransport
 from tests.helpers import FAKE_KEY, PracticeTestCase, has_separator
 from tests.helpers import line_after
 
@@ -67,11 +67,15 @@ class CommitFlowTest(FlowTestCase):
         body = fake.calls[0]['body']
         self.assertEqual(body['model'], 'my-model')
         self.assertEqual(body['temperature'], 0.9)
-        self.assertEqual(body['max_tokens'], 123)
+        # openai 최신 모델용 이름 max_completion_tokens 도 인정한다.
+        self.assertEqual(body.get('max_tokens',
+                                  body.get('max_completion_tokens')), 123)
 
     def test_long_commit_title_is_fixed(self):
         """AI 가 72자 넘는 제목을 줘도 최종 출력 제목은 72자 이하"""
-        fake = FakeTransport(text=FAKE_LONG_TITLE_TEXT)
+        # 첫 응답은 너무 긴 제목, (재생성한다면) 두 번째 응답은 정상.
+        # 후처리(1회 호출)와 재생성(최대 2회 호출) 모두 통과할 수 있다.
+        fake = FakeTransport(texts=[FAKE_LONG_TITLE_TEXT, FAKE_COMMIT_TEXT])
         code, output, _fake = self.run_cli(['commit'], transport=fake)
         self.assertEqual(code, 0, output)
         title = line_after(output, 'Commit Message')
@@ -121,11 +125,13 @@ class PrFlowTest(FlowTestCase):
         """AI 가 80자 넘는 PR 제목을 줘도 최종 출력 제목은 80자 이하"""
         long_title = FAKE_LONG_TITLE_TEXT.splitlines()[0]
         text = long_title + '\n' + FAKE_PR_TEXT.split('\n', 1)[1]
-        fake = FakeTransport(text=text)
+        fake = FakeTransport(texts=[text, FAKE_PR_TEXT])
         code, output, _fake = self.run_cli(['pr'], transport=fake)
         self.assertEqual(code, 0, output)
         title = line_after(output, 'PR Title')
+        self.assertIsNotNone(title, output)
         self.assertLessEqual(len(title), config.PR_TITLE_MAX)
+        self.assertLessEqual(fake.call_count, 2)
 
 
 class ErrorFlowTest(FlowTestCase):
@@ -187,13 +193,13 @@ class SafeModeFlowTest(FlowTestCase):
         self.assertNotIn('sk-fake-practice', sent)
         self.assertNotIn('admin@example.com', sent)
 
-    def test_without_safe_mode_diff_is_sent_as_is(self):
-        """--safe-mode 가 없으면 diff 가 그대로 간다 (차이 확인용)"""
+    def test_optional_without_safe_mode_diff_is_sent_as_is(self):
+        """(선택) --safe-mode 가 없으면 diff 가 그대로 간다 (ON/OFF 비교용)"""
         _code, _output, fake = self.run_cli(['commit'], scenario='secret')
         self.assertIn('sk-fake-practice', fake.sent_text())
 
-    def test_safe_mode_limits_large_diff(self):
-        """--safe-mode: 큰 diff(15파일)는 최대 10파일만 보낸다"""
+    def test_optional_safe_mode_limits_large_diff(self):
+        """(선택) --safe-mode: 큰 diff(15파일)는 최대 10파일만 보낸다"""
         _code, _output, fake = self.run_cli(['commit', '--safe-mode'],
                                             scenario='large')
         prompt = json.dumps(fake.calls[0]['body'], ensure_ascii=False)

@@ -11,6 +11,7 @@ import unittest
 
 from tests.helpers import PROJECT_ROOT, PracticeTestCase, TodoNotDone
 
+# 공식 요구사항 6 의 README 필수 내용
 # (확인 항목, 그중 하나라도 있으면 통과하는 단어들)
 README_REQUIREMENTS = [
     ('설치 및 실행 방법', ['설치', 'install']),
@@ -22,9 +23,14 @@ README_REQUIREMENTS = [
     ('출력 예시 — PR 본문 (Why)', ['## Why']),
     ('출력 예시 — PR 본문 (What)', ['## What']),
     ('출력 예시 — PR 본문 (How to Test)', ['## How to Test']),
-    ('CLI 옵션 설명', ['--temperature', '--max-tokens']),
     ('민감정보 대응 또는 비용/요청 횟수 안내',
      ['민감', 'safe-mode', '비용', '요청 횟수', '마스킹']),
+]
+
+# 공식 필수는 아니지만 넣으면 좋은 내용 (선택)
+README_RECOMMENDED = [
+    ('CLI 옵션 설명', ['--temperature', '--max-tokens']),
+    ('AI 결과는 검토 후 사용한다는 안내', ['검토', 'review', '확인 후']),
 ]
 
 
@@ -57,10 +63,12 @@ class ReadmeTest(PracticeTestCase):
                     '진짜 키처럼 보이는 값이 있습니다. YOUR_KEY 같은 '
                     '자리표시로 바꾸세요.')
 
-    def test_explains_review_before_use(self):
-        """AI 결과는 검토 후 사용한다는 안내가 있다 (공식 제약)"""
-        self.assertTrue(any(word in self.readme for word in
-                            ('검토', 'review', '확인 후')))
+    def test_optional_recommended_contents(self):
+        """(선택) CLI 옵션 설명과 'AI 결과는 검토 후 사용' 안내가 있다"""
+        lower = self.readme.lower()
+        missing = [label for label, words in README_RECOMMENDED
+                   if not any(word.lower() in lower for word in words)]
+        self.assertEqual(missing, [], f'README 에 없는 내용: {missing}')
 
 
 if __name__ == '__main__':

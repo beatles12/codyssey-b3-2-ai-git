@@ -14,12 +14,14 @@
 | 0 | 실습 환경 확인 | (없음) | 기본 테스트 | 20분 |
 | 1 | CLI 옵션·입력값 검사 | `ai_gitgen/cli.py` | 12 | 2~3시간 |
 | 2 | Git 변경 사항 수집 | `ai_gitgen/git_collector.py` | 18 | 4~5시간 |
-| 3 | 안전 모드 (마스킹·전송 제한) | `ai_gitgen/safety.py` | 12 | 4~5시간 |
+| 3 | 안전 모드 (마스킹 필수·전송 제한 선택) | `ai_gitgen/safety.py` | 7 | 3~4시간 |
 | 4 | 프롬프트 만들기 | `ai_gitgen/prompt_builder.py` | 11 | 3~4시간 |
-| 5 | AI API 요청·응답·오류 처리 | `ai_gitgen/ai_client.py` | 29 | 6~8시간 |
+| 5 | AI API 요청·응답·오류 처리 | `ai_gitgen/ai_client.py` | 25 | 6~8시간 |
 | 6 | 출력 검증·다듬기 | `ai_gitgen/formatter.py` | 21 | 4~5시간 |
-| 7 | 전체 흐름 연결 | `ai_gitgen/cli.py` | 18 | 4~6시간 |
-| 8 | README·실제 API 1회·제출 | `README.md` | 3 + 직접 확인 | 3~4시간 |
+| 7 | 전체 흐름 연결 | `ai_gitgen/cli.py` | 16 | 4~6시간 |
+| 8 | README·실제 API 1회·제출 | `README.md` | 2 + 직접 확인 | 3~4시간 |
+
+> 필수 테스트 수에는 `(선택)` 테스트가 빠져 있습니다. 선택 테스트는 통과하지 않아도 공식 미션 필수가 아닙니다.
 
 ## 모든 단계에서 공통으로 하는 일
 
@@ -196,6 +198,7 @@ print(repr('  x '.strip()))  # 'x'  ← 앞 공백도 사라진다!
 - `' M app.py'` 를 먼저 `.strip()` 하면 `'M app.py'` 가 되어 위치가 한 칸 밀립니다.
 - 이름 바꾸기 줄: `R  old.md -> new.md` → `' -> '` 로 나눠 마지막 것
 - `cwd` 는 `subprocess.run(..., cwd=cwd)` 로 그대로 넘기면 됩니다. (`None` 이면 현재 폴더)
+- 공식 제약은 "변경 사항 수집은 `git status`, `git diff` 범위"입니다. 저장소 확인은 `git status` 의 성공/실패로, 브랜치 이름은 `git status --porcelain --branch` 첫 줄(`## 브랜치이름...`)로도 얻을 수 있습니다. `git rev-parse`·`git branch` 를 써도 테스트는 통과하지만, 어느 쪽을 골랐는지와 이유를 설명할 수 있게 하세요.
 - 연습 저장소에서 직접 비교: `git diff` 와 `git diff --cached` 의 결과가 어떻게 다른지 먼저 눈으로 보세요.
 
 **실행 명령**
@@ -234,17 +237,17 @@ python -m learning_kit.practice 2
 
 | 항목 | 내용 |
 |---|---|
-| 무엇을 만드는가 | diff 안의 API Key·이메일 등을 `[MASKED]` 로 가리는 함수, diff 를 최대 10파일·200줄로 자르는 함수, 둘을 묶는 `--safe-mode` 함수 |
-| 왜 필요한가 | 공식 제약: diff 속 민감정보를 프롬프트에 넣지 않도록 (A) 마스킹 또는 (B) 일부만 전송 중 1개 이상. 보내는 양이 줄면 **비용**도 줄어듭니다. |
+| 무엇을 만드는가 | diff 안의 API Key·이메일 등을 `[MASKED]` 로 가리는 함수 (A), (선택) diff 를 최대 10파일·200줄로 자르는 함수 (B), 이를 묶는 `--safe-mode` 함수 |
+| 왜 필요한가 | 공식 제약: diff 속 민감정보를 프롬프트에 넣지 않도록 (A) 마스킹 또는 (B) 일부만 전송 중 **1개 이상**. 이 실습은 (A)를 필수, (B)를 선택으로 둡니다. (B)까지 하면 보내는 양이 줄어 **비용**도 줄어듭니다. |
 | 수정할 파일 | `ai_gitgen/safety.py` — `SENSITIVE_PATTERNS`, `mask_sensitive()`, `limit_diff()`, `apply_safe_mode()` |
 | 사용하는 것 | 표준 라이브러리 `re` (정규표현식) |
 
 **TODO**
 
-- [ ] `SENSITIVE_PATTERNS` 채우기: ① `sk-` 로 시작하는 긴 키 ② `api_key`·`secret`·`token`·`password` 뒤 `=`/`:` 로 이어지는 값 ③ 이메일 ④ (선택) 휴대전화
+- [ ] `SENSITIVE_PATTERNS` 채우기: ① `sk-` 로 시작하는 긴 키 ② 이메일 — (선택) `api_key`·`secret`·`token`·`password` 뒤 `=`/`:` 로 이어지는 값, 휴대전화
 - [ ] `mask_sensitive(text)` — 패턴을 돌며 바꾸기. **민감정보가 아닌 글자는 그대로**
-- [ ] `limit_diff(diff, max_files, max_lines)` — 파일 수 제한 → 줄 수 제한 → (잘랐다면) 안내 1줄
-- [ ] `apply_safe_mode(diff, enabled)`
+- [ ] (선택) `limit_diff(diff, max_files, max_lines)` — 파일 수 제한 → 줄 수 제한 → (잘랐다면) 안내 1줄
+- [ ] `apply_safe_mode(diff, enabled)` — 마스킹(필수) + `limit_diff` 를 구현했다면 전송 제한
 
 **힌트 (정답 아님)**
 
@@ -286,8 +289,8 @@ python -m learning_kit.practice_repo secret   # 가짜 비밀이 든 연습 저�
 +API_KEY = "[MASKED]"
 +ADMIN_EMAIL = "[MASKED]"
 ...
-  -> 결과 줄 수: 201, 파일 수: 7
-  필수: 통과 12 / TODO 0 / 실패 0 / 오류 0
+  -> 결과 줄 수: 201, 파일 수: 7      (선택: limit_diff 를 구현한 경우)
+  필수: 통과 7 / TODO 0 / 실패 0 / 오류 0
 ```
 
 **오류가 났을 때 확인할 내용**
@@ -295,9 +298,9 @@ python -m learning_kit.practice_repo secret   # 가짜 비밀이 든 연습 저�
 | 증상 | 확인 |
 |---|---|
 | `test_normal_code_is_unchanged` 실패 | 패턴이 너무 넓음 (예: `title` 까지 가림) |
-| `DB_PASSWORD` 가 안 가려짐 | 이름 앞에 다른 글자(`DB_`)가 붙어도 찾는지, 대소문자 무시 |
+| (선택) `DB_PASSWORD` 가 안 가려짐 | 이름 앞에 다른 글자(`DB_`)가 붙어도 찾는지, 대소문자 무시 |
 | 줄 수가 바뀜 | 패턴이 줄바꿈 `\n` 까지 먹지 않는지 (`\s` 는 줄바꿈 포함!) |
-| 10파일이 넘게 남음 | 11번째 `diff --git` 줄에서 멈추는지 |
+| (선택) 10파일이 넘게 남음 | 11번째 `diff --git` 줄에서 멈추는지 |
 
 **자동 테스트**: `tests/practice/test_step3_safety.py`
 
@@ -379,7 +382,7 @@ python -m learning_kit.practice 4
 **TODO**
 
 - [ ] `get_api_key()` — 없거나 공백이면 `MissingApiKeyError` (메시지에 환경변수 **이름**과 설정 예시, 값은 절대 X)
-- [ ] `build_headers(api_key, provider)` — anthropic: `x-api-key`·`anthropic-version`, openai: `Authorization: Bearer`
+- [ ] `build_headers(api_key, provider)` — anthropic: `x-api-key`·`anthropic-version`, openai: `Authorization: Bearer` (필수는 `config.DEFAULT_PROVIDER` 형식 하나, 다른 형식은 선택)
 - [ ] `build_request_body(...)` — `model`, `max_tokens`, `temperature`, `messages`
 - [ ] `extract_text(data, provider)` — anthropic 은 `content` 목록 중 `type == 'text'` 만! 모양이 다르면 `AIClientError`
 - [ ] `send_http_request(url, headers, body, timeout)` — HTTPError(상태 코드) / URLError(원인) / TimeoutError / JSON 오류
@@ -415,6 +418,7 @@ except ValueError as error:
 
 - `urllib.request.Request(url, data=바이트, headers=사전, method='POST')` 를 만들어 `urllib.request.urlopen(요청, timeout=...)` 에 넘깁니다. **반드시 `urllib.request.urlopen` 형태로** 부르세요. (테스트가 이 함수를 가짜로 바꿉니다.)
 - `urllib.error.HTTPError` 는 `URLError` 의 **자식**입니다. 어느 쪽을 먼저 `except` 해야 할까요?
+- openai 형식의 일부 최신(추론) 모델은 `max_tokens` 대신 `max_completion_tokens` 를 요구하고 temperature 를 바꿀 수 없습니다. 테스트는 openai 형식에서 두 이름을 모두 인정합니다.
 - `HTTPError` 객체: `error.code` (상태 코드), `error.read()` (오류 본문 바이트)
 - 응답 예시 파일: `practice_data/api_responses/*.json` — 직접 열어 모양을 보세요.
 
@@ -442,7 +446,7 @@ python -m learning_kit.practice 5
 [INFO] 보낸 헤더(키는 *** 로 가림): {'x-api-key': '***', ...}
 >>> get_api_key()  (환경변수 없음 -> MissingApiKeyError 예상)
 예상대로 MissingApiKeyError: AI_API_KEY 환경변수가 설정되지 않았습니다. ...
-  필수: 통과 29 / TODO 0 / 실패 0 / 오류 0
+  필수: 통과 25 / TODO 0 / 실패 0 / 오류 0
 ```
 
 **오류가 났을 때 확인할 내용**
@@ -450,7 +454,7 @@ python -m learning_kit.practice 5
 | 증상 | 확인 |
 |---|---|
 | `RuntimeError: 테스트 중에는 실제 네트워크 ... 금지` | `call_ai_api` 가 `transport` 를 무시하고 직접 통신함 |
-| `test_anthropic_skips_thinking_block` 실패 | `content[0]['text']` 로 꺼냄 → `type` 확인 필요 |
+| `test_default_provider_response` 실패 (anthropic) | `content[0]['text']` 로 꺼냄 → `type` 확인 필요 |
 | `KeyError` 가 그대로 보임 | `try/except (KeyError, IndexError, TypeError)` → `AIClientError` |
 | 401 테스트에 `'401'` 없음 | `except URLError` 가 `HTTPError` 보다 먼저 있음 |
 | `TypeError: POST data should be bytes` | `json.dumps(...).encode('utf-8')` |
@@ -572,7 +576,7 @@ python ../main.py commit                       # 키가 없으면 [ERROR] AI_API
 cd ..
 ```
 
-**정상 결과**: 데모에서 5가지 상황(commit, pr, 변경 없음, 키 없음, safe-mode)의 출력과 `가짜 AI 호출 횟수` 가 기대대로 나오고, `필수: 통과 18`
+**정상 결과**: 데모에서 5가지 상황(commit, pr, 변경 없음, 키 없음, safe-mode)의 출력과 `가짜 AI 호출 횟수` 가 기대대로 나오고, `필수: 통과 16`
 
 **오류가 났을 때 확인할 내용**
 
@@ -636,11 +640,13 @@ python -m learning_kit.practice      # 전체 진행 현황 — 모두 '완료'
 
 | 증상 | 확인 |
 |---|---|
-| HTTP 400 + temperature 관련 메시지 | 그 모델은 temperature 를 받지 않음 → 받는 모델로 바꾸거나 max-tokens 로 실험 |
+| HTTP 400 + temperature 관련 메시지 | 그 모델은 temperature 를 바꿀 수 없음 → 기본값만 받는 모델(예: Claude Haiku 5.5)은 `--temperature 1.0`, 아니면 temperature 를 받는 모델로 바꾸거나 max-tokens 로 실험 |
+| HTTP 400 + `max_tokens` 관련 (openai) | 최신 모델은 `max_completion_tokens` 라는 이름을 요구 |
 | HTTP 401 | 키 철자, 따옴표, 다른 터미널 창에서 설정하지 않았는지 |
 | HTTP 404 | `--model` 이름 철자 |
 | HTTP 429 | 잠시 기다린 뒤 다시 (반복 실행 금지) |
 | 출력이 중간에 끊김 | `max_tokens` 가 너무 작음 (응답의 `stop_reason` 확인) |
+| "응답에 글자가 없다"는 오류 | 최신 모델은 답을 쓰기 전에 생각(thinking)에 토큰을 먼저 씀 → `max_tokens` 를 늘려 보기 |
 
 **자동 테스트**: `tests/practice/test_step8_readme.py` + `tests/base/test_05_security.py`
 

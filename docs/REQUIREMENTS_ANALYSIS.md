@@ -74,8 +74,8 @@
 | 항목 | 이유 |
 |---|---|
 | `--dry-run` 옵션 | AI 를 부르지 않고 "보낼 프롬프트"를 먼저 확인 → 비용 0원으로 민감정보·길이 점검 |
-| `--safe-mode` 에서 (A)+(B) 둘 다 | 공식은 1개 이상. 둘 다 연습하면 보너스 3 준비가 됨 |
-| 제공자 2종(anthropic / openai) 형식 | 공식 미션은 제공자를 정하지 않음. 받은 키의 제공자에 맞춰 고를 수 있게 함 |
+| `--safe-mode`: (A) 마스킹은 필수 테스트, (B) 전송 제한은 선택 테스트 | 공식은 1개 이상. (B)까지 하면 보너스 3 준비가 됨 |
+| 제공자 2종(anthropic / openai) 형식 | 공식 미션은 제공자를 정하지 않음. 받은 키의 제공자에 맞춰 고를 수 있게 함. 필수 테스트는 `config.DEFAULT_PROVIDER` 형식 1개만 확인하고, 다른 형식은 선택 |
 | `transport` 매개변수 (가짜 통신 주입) | 실제 API·키·비용 없이 전체 흐름을 자동 테스트하기 위함 |
 
 ---
@@ -114,6 +114,7 @@
 - `git diff --cached` : `git add` 한(staged) 변경의 **내용**
 - `git diff` : 아직 `git add` 안 한(unstaged) 변경의 **내용**
 - 새 파일(`??`, untracked)은 status 에는 보이지만 diff 에는 나오지 않는다
+- 저장소 확인과 브랜치 이름도 `git status` (`--porcelain --branch` 의 첫 줄 `## 브랜치`)로 얻을 수 있다 → 공식 제약 "수집은 status·diff 범위"를 엄격하게 지키는 방법
 - `git log` 는 **이미 커밋된 과거 기록** → 이번 미션의 입력이 아님 (교재 'Git diff 와 Git log 차이')
 
 ### 4-2. AI API 연동 원리 (REST API)
@@ -146,6 +147,8 @@ API Key (환경변수) ─┐
 > 예: Anthropic 의 Claude 4.7 이후 모델은 temperature 를 바꿀 수 없고(기본값이 아닌 값, 일부 모델은 값과 상관없이 HTTP 400), API 버전 `2026-10-21` 에서는 모든 모델이 temperature 를 거부합니다.
 > 그래서 이 실습은 `anthropic-version: 2023-06-01` + temperature 를 받는 모델(`claude-haiku-4-5`)을 기본값으로 두었습니다.
 > 체크리스트 항목 1의 "temperature **또는** max-tokens 변경 시 차이 재현"은 **max-tokens 만으로도** 확인할 수 있습니다.
+> 기본값만 받는 모델(예: Claude Haiku 5.5, Sonnet 5.5)은 `--temperature 1.0` 으로 실행하면 됩니다.
+> OpenAI 의 추론 계열 모델은 temperature 를 바꿀 수 없고, `max_tokens` 대신 `max_completion_tokens` 를 요구합니다. (연습 테스트는 openai 형식에서 두 이름을 모두 인정합니다.)
 > 실제로 쓸 제공자·모델이 정해지면 그 제공자의 공식 문서를 꼭 다시 확인하세요.
 
 ### 4-3. 커밋 메시지·PR 설명 생성 과정
@@ -194,7 +197,7 @@ API Key (환경변수) ─┐
 |---|---|---|
 | 키가 코드·커밋에 섞임 | 환경변수만 사용, `.env` 는 `.gitignore` | `tests/base/test_05_security.py` 가 키 모양 문자열을 계속 감시 |
 | diff 에 키·개인정보 | `--safe-mode` 마스킹 (A) | Step 3 `mask_sensitive()` |
-| diff 가 너무 큼 (비용↑) | 전송 제한 (B) 10파일·200줄 | Step 3 `limit_diff()` |
+| diff 가 너무 큼 (비용↑) | 전송 제한 (B) 10파일·200줄 | Step 3 `limit_diff()` (선택) |
 | 반복 실행으로 비용 폭주 | 1회 실행 = 1회 호출, 호출 횟수 로그, `max_tokens` 상한 4096 | Step 1, 7 |
 | 보내기 전 확인 불가 | `--dry-run` 으로 프롬프트 미리 보기 | Step 7 (선택) |
 | AI 결과를 그대로 사용 | 사람이 검토 후 적용 (README 에 명시) | Step 8 |
@@ -258,6 +261,8 @@ API Key (환경변수) ─┐
 | 새 파일(untracked)? | 정하지 않음 | status 에는 포함, diff 에는 없음 → 파일 이름만 전달 | ✅ |
 | 재생성 vs 후처리 | 택1 | 테스트는 둘 다 허용 (최종 제목 길이와 호출 ≤ 2회만 확인) | ✅ |
 | 종료 코드 | 정하지 않음 | 정상·변경 없음 0, 오류 1, 옵션 오류 2 | ✅ (테스트는 0 / 0이 아님만 확인) |
+| 출력 헤더 단어 | 결과 예시는 "참고용" | 공식 예시와 같은 `--- Commit Message ---`, `--- PR Title ---`, `--- PR Body ---` 를 테스트가 찾음 | ⚠️ 바꾸면 Step 6·7 테스트도 수정 |
+| PR 에 현재 브랜치 표시 | 공식 `pr` 결과 예시에 있음 | 필수 (작업 맥락으로 프롬프트에도 넣음) | ✅ |
 | 외부 패키지 | 정하지 않음 | 표준 라이브러리만 (`urllib`) | 가능하지만 테스트가 `urllib.request.urlopen` 을 가짜로 바꾸므로 Step 5 테스트를 고쳐야 함 |
 
 ---

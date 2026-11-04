@@ -54,9 +54,13 @@ def run_git(args, cwd=None):
 def is_git_repository(cwd=None):
     """cwd 가 Git 저장소(작업 폴더) 안이면 True, 아니면 False.
 
-    힌트: `git rev-parse --is-inside-work-tree` 는 저장소 안에서
-    'true' 를 출력하고, 저장소 밖에서는 실패(오류)한다.
+    힌트: `git status` 는 저장소 밖에서 실패(오류)한다.
+    (`git rev-parse --is-inside-work-tree` 도 같은 일을 한다.)
     이 함수는 예외를 밖으로 내보내지 말고 True / False 만 돌려준다.
+
+    [공식 제약] "Git 변경 사항 수집은 git status, git diff 범위로 제한"
+    저장소 확인·브랜치 이름은 변경 사항 수집은 아니지만, git status 만으로도
+    얻을 수 있으니 어느 쪽을 쓸지 정하고 이유를 설명할 수 있게 하자.
     """
     # TODO(Step 2): 아래 줄을 지우고 직접 구현하세요.
     raise NotImplementedError('Step 2 - git_collector.is_git_repository()')
@@ -131,7 +135,8 @@ def get_current_branch(cwd=None):
     PR 초안을 만들 때 [INFO] 현재 브랜치: ... 로 출력하고,
     프롬프트에도 넣어 AI 가 작업 맥락을 알 수 있게 한다.
 
-    힌트: `git branch --show-current` 또는 `git rev-parse --abbrev-ref HEAD`
+    힌트: `git status --porcelain --branch` 의 첫 줄 '## 브랜치이름...'
+    또는 `git branch --show-current`
     """
     # TODO(Step 2): 아래 줄을 지우고 직접 구현하세요.
     raise NotImplementedError('Step 2 - git_collector.get_current_branch()')

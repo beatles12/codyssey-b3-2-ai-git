@@ -95,7 +95,9 @@ def demo_step2(_extra):
     print(f'\n[INFO] 아래는 연습 저장소({repo})에서 실행한 결과입니다.')
     show("run_git(['--version'])", gc.run_git, ['--version'])
     show('is_git_repository(연습 저장소)', gc.is_git_repository, repo)
-    with tempfile.TemporaryDirectory() as empty_dir:
+    with tempfile.TemporaryDirectory() as empty_dir, \
+            mock.patch.dict(os.environ, {'GIT_CEILING_DIRECTORIES':
+                                         os.path.dirname(empty_dir)}):
         show('is_git_repository(빈 임시 폴더)', gc.is_git_repository,
              empty_dir)
     show('get_current_branch()', gc.get_current_branch, repo)
@@ -266,15 +268,21 @@ def demo_step7(extra):
 
 
 def demo_step8(_extra):
+    from tests.practice.test_step8_readme import README_RECOMMENDED
     from tests.practice.test_step8_readme import README_REQUIREMENTS
     title('Step 8 · README 제출 기준 점검')
     readme = (PROJECT_ROOT / 'README.md').read_text(encoding='utf-8')
     if 'TODO(Step 8)' in readme:
         print('[TODO] README.md 에 아직 TODO(Step 8) 표시가 있습니다.')
-    for label, words in README_REQUIREMENTS:
-        ok = any(word.lower() in readme.lower() for word in words)
-        mark = '[통과]' if ok else '[부족]'
-        print(f'  {mark} {label}  (찾는 단어: {", ".join(words)})')
+    if '✏️' in readme:
+        print('[TODO] README.md 에 아직 채우지 않은 ✏️ 칸이 있습니다.')
+    for group, items in (('필수', README_REQUIREMENTS),
+                         ('선택', README_RECOMMENDED)):
+        print(f' [{group}]')
+        for label, words in items:
+            ok = any(word.lower() in readme.lower() for word in words)
+            mark = '[통과]' if ok else '[부족]'
+            print(f'  {mark} {label}  (찾는 단어: {", ".join(words)})')
 
 
 DEMOS = {
@@ -290,9 +298,9 @@ def main(argv=None):
         print('예)    python -m learning_kit.demo 1 pr --temperature 0.9')
         return 2
     # 데모 중에는 실제 네트워크 호출을 막는다.
-    with mock.patch('urllib.request.urlopen',
-                    side_effect=RuntimeError('데모에서는 실제 네트워크 '
-                                             '호출이 금지되어 있습니다.')):
+    blocked = RuntimeError('데모에서는 실제 네트워크 호출이 금지되어 있습니다.')
+    with mock.patch('urllib.request.urlopen', side_effect=blocked), \
+            mock.patch('socket.create_connection', side_effect=blocked):
         DEMOS[int(argv[0])](argv[1:])
     print()
     print(f'[INFO] 자동 채점: python -m learning_kit.practice {argv[0]}')

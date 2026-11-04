@@ -33,8 +33,12 @@ DEFAULT_PROVIDER = 'anthropic'
 # anthropic: claude-haiku-4-5 는 저렴한 편이고, API 버전 2023-06-01 에서
 #            temperature 값을 바꿀 수 있는 모델입니다.
 #            (Claude 4.7 이후 모델은 temperature 를 바꿀 수 없습니다.
-#             기본값이 아닌 값을, 일부 모델은 값과 상관없이 거부합니다.)
-# openai   : 제공자 문서에서 temperature 를 지원하는 모델 이름을 확인해
+#             Haiku 5.5·Sonnet 5.5 는 기본값 1.0 만 허용하므로
+#             --temperature 1.0 으로 실행해야 하고, Opus 계열은 값과
+#             상관없이 temperature 를 거부합니다.)
+# openai   : 추론(reasoning) 계열 모델은 temperature 를 바꿀 수 없고
+#            max_tokens 대신 max_completion_tokens 를 요구합니다.
+#            제공자 문서에서 모델별 지원 여부를 확인해
 #            --model 옵션이나 이 값을 바꿔 쓰세요.
 DEFAULT_MODEL = 'claude-haiku-4-5'
 

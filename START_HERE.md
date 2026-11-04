@@ -150,6 +150,7 @@ codyssey-b3-2-ai-git/
 ## 8. 알아 둘 점 (준비 과정에서 확인된 사항)
 
 - **코딩 가이드라인 파일 없음**: `CODYSSEY_CODING_GUIDELINES.md` 를 받지 못해 일반 PEP 8 기준으로 작성했습니다. 받으면 저장소 루트에 넣고 기준을 비교하세요. (`docs/REQUIREMENTS_ANALYSIS.md` 7절)
-- **AI 제공자 미정**: 공식 미션은 제공자를 정하지 않습니다. `config.py` 에 anthropic / openai 두 형식을 준비했고, 테스트는 두 형식을 모두 확인합니다.
-- **temperature 지원 여부**: 최신 모델 중에는 temperature 를 거부(HTTP 400)하는 모델이 있습니다. 기본 모델은 temperature 를 받는 모델로 두었습니다. 실제 사용 전 제공자 문서를 꼭 확인하세요.
+- **AI 제공자 미정**: 공식 미션은 제공자를 정하지 않습니다. `config.py` 에 anthropic / openai 두 형식을 준비했습니다. 필수 테스트는 `config.DEFAULT_PROVIDER` 에 고른 형식 하나만 확인하고, 다른 형식은 (선택) 테스트입니다.
+- **temperature 지원 여부**: 최신 모델 중에는 temperature 를 거부(HTTP 400)하는 모델이 있습니다. 기본 모델은 temperature 를 받는 모델로 두었습니다. OpenAI 추론 계열 모델은 `max_tokens` 대신 `max_completion_tokens` 를 요구합니다. 실제 사용 전 제공자 문서를 꼭 확인하세요.
+- **필수와 선택**: `(선택)` 이 붙은 테스트는 공식 미션 필수가 아닙니다. 예: safe-mode 의 전송 제한(B), 다른 제공자 형식, `--dry-run`.
 - 공식 문서와 이 실습 자료가 다르면 **공식 문서가 우선**입니다.
