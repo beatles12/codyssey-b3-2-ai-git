@@ -1,90 +1,36 @@
-"""프로그램 전체에서 함께 쓰는 기본값(상수) 모음.
+"""프로그램 전체에서 쓰는 기본값(상수). 의미와 모델별 주의사항: docs/modules/config.md"""
 
-[상태] ✅ 구현됨 (학습 지원용 기본값)
-    - 값은 바꿔도 됩니다. 다만 tests/base 의 환경 테스트가 일부 값을
-      확인하므로, 바꾼 뒤에는 `python -m learning_kit.practice base` 로
-      다시 확인하세요.
-
-왜 상수를 한 파일에 모을까?
-    - 숫자(50, 72, 80 ...)가 코드 여기저기에 흩어져 있으면 규칙이
-      바뀔 때 모두 찾아 고쳐야 합니다. 한 곳에 모으면 한 번만 고치면 됩니다.
-"""
-
-# ---------------------------------------------------------------------------
-# 1. AI API Key 를 읽어 올 환경변수 이름
-#    - 키 "값"은 절대 코드에 쓰지 않습니다. 여기에는 "이름"만 적습니다.
-# ---------------------------------------------------------------------------
+# 1. API Key 를 읽어 올 환경변수 이름 (키 "값"은 코드에 쓰지 않는다)
 API_KEY_ENV_NAME = 'AI_API_KEY'
 
-# ---------------------------------------------------------------------------
-# 2. AI 제공자(provider)와 모델 기본값
-#    - 공식 미션은 특정 제공자를 정하지 않았습니다.
-#    - 아래 PROVIDERS 에는 많이 쓰는 두 가지 REST API 형식을 적어 두었습니다.
-#    - 실제로 받은 API Key 의 제공자에 맞춰 DEFAULT_PROVIDER 와
-#      DEFAULT_MODEL 을 고르세요. (교재 'API와 환경변수' 절 참고)
-#
-#    [주의] 최신 모델 중에는 temperature 를 거부(HTTP 400)하거나
-#    기본값만 허용하는 모델이 있습니다. temperature 실험을 하려면
-#    temperature 를 지원하는 모델을 골라야 합니다. 제공자 공식 문서를
-#    꼭 확인하세요.
-# ---------------------------------------------------------------------------
+# 2. AI 제공자와 모델 기본값 (받은 키의 제공자에 맞춰 고른다)
 DEFAULT_PROVIDER = 'anthropic'
-
-# anthropic: claude-haiku-4-5 는 저렴한 편이고, API 버전 2023-06-01 에서
-#            temperature 값을 바꿀 수 있는 모델입니다.
-#            (Claude 4.7 이후 모델은 temperature 를 바꿀 수 없습니다.
-#             Haiku 5.5·Sonnet 5.5 는 기본값 1.0 만 허용하므로
-#             --temperature 1.0 으로 실행해야 하고, Opus 계열은 값과
-#             상관없이 temperature 를 거부합니다.)
-# openai   : 추론(reasoning) 계열 모델은 temperature 를 바꿀 수 없고
-#            max_tokens 대신 max_completion_tokens 를 요구합니다.
-#            제공자 문서에서 모델별 지원 여부를 확인해
-#            --model 옵션이나 이 값을 바꿔 쓰세요.
 DEFAULT_MODEL = 'claude-haiku-4-5'
-
 PROVIDERS = {
-    # Anthropic Messages API (REST)
-    'anthropic': {
-        'url': 'https://api.anthropic.com/v1/messages',
-        'api_version': '2023-06-01',
-    },
-    # OpenAI 호환 Chat Completions API (REST)
-    'openai': {
-        'url': 'https://api.openai.com/v1/chat/completions',
-    },
+    'anthropic': {'url': 'https://api.anthropic.com/v1/messages',
+                  'api_version': '2023-06-01'},
+    'openai': {'url': 'https://api.openai.com/v1/chat/completions'},
 }
 
-# ---------------------------------------------------------------------------
-# 3. API 호출 파라미터 기본값과 허용 범위 (CLI 옵션의 기본값으로 사용)
-# ---------------------------------------------------------------------------
-DEFAULT_TEMPERATURE = 0.3      # 낮을수록 매번 비슷한 결과, 높을수록 다양함
+# 3. API 호출 파라미터 기본값과 허용 범위 (CLI 옵션의 기본값)
+DEFAULT_TEMPERATURE = 0.3      # 낮을수록 일관된 결과, 높을수록 다양함
 TEMPERATURE_MIN = 0.0
-TEMPERATURE_MAX = 1.0          # 두 제공자가 모두 받아들이는 안전한 범위
-
-DEFAULT_MAX_TOKENS = 1024      # AI 가 만들 수 있는 출력 길이의 상한
+TEMPERATURE_MAX = 1.0          # 두 제공자가 모두 받는 범위
+DEFAULT_MAX_TOKENS = 1024      # 출력 길이 상한
 MAX_TOKENS_MIN = 1
-MAX_TOKENS_LIMIT = 4096        # 비용 폭주를 막기 위한 우리 프로그램의 상한
+MAX_TOKENS_LIMIT = 4096        # 비용 폭주를 막는 상한
+REQUEST_TIMEOUT_SECONDS = 30   # 응답 대기 최대 시간(초)
+MAX_API_CALLS_PER_RUN = 1      # 공식 제약: 1회 실행당 1~2회 이내
 
-REQUEST_TIMEOUT_SECONDS = 30   # 응답을 기다리는 최대 시간(초)
-
-# 1회 실행당 AI API 호출 횟수 권장 상한 (공식 제약: 1~2회 이내)
-MAX_API_CALLS_PER_RUN = 1
-
-# ---------------------------------------------------------------------------
 # 4. 출력 형식 규칙 (공식 요구사항 '출력 형식 검증 및 다듬기')
-# ---------------------------------------------------------------------------
-COMMIT_TITLE_RECOMMENDED = 50  # 커밋 제목 권장 길이
-COMMIT_TITLE_MAX = 72          # 커밋 제목 최대 길이
-PR_TITLE_MAX = 80              # PR 제목 최대 길이
+COMMIT_TITLE_RECOMMENDED = 50
+COMMIT_TITLE_MAX = 72
+PR_TITLE_MAX = 80
 PR_SECTIONS = ('Why', 'What', 'How to Test')
 
-# ---------------------------------------------------------------------------
-# 5. 안전 모드(--safe-mode) 전송 제한 (공식 제약 (B) 예시 값)
-# ---------------------------------------------------------------------------
+# 5. 안전 모드 전송 제한 (공식 제약 (B) 예시 값)
 SAFE_MODE_MAX_FILES = 10
 SAFE_MODE_MAX_LINES = 200
 
-# ---------------------------------------------------------------------------
 # 6. 터미널 출력 구분선
-# ---------------------------------------------------------------------------
 SEPARATOR = '-' * 40

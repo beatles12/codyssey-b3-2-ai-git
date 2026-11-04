@@ -5,6 +5,7 @@
 >
 > - 명령어의 `python` 은 Mac/Linux 에서 `python3` 일 수 있습니다.
 > - **힌트는 정답이 아닙니다.** 다른 예제로 "도구 사용법"만 보여 줍니다.
+> - 코드에는 함수마다 한 줄 설명만 있습니다. 입력·출력·규칙(명세)은 `docs/modules/<모듈>.md` 에 있습니다. (CODYSSEY 가이드라인 2·7절)
 > - 막히면 순서대로: ① 오류 메시지 첫 줄 읽기 → ② `-v` 로 자세히 보기 → ③ 이 문서의 "오류가 났을 때" → ④ 교재 힌트
 
 ## 전체 지도
@@ -91,7 +92,7 @@ cd practice_repo && git status && git diff && git diff --cached && cd ..
 |---|---|
 | 무엇을 만드는가 | `python main.py commit --temperature 0.2 --max-tokens 300` 같은 명령을 해석하는 **파서**와, 값이 허용 범위 안인지 보는 **검사 함수** |
 | 왜 필요한가 | 공식 요구: 모델·temperature·max_tokens 를 **CLI 옵션으로 변경 가능 + 기본값**. 옵션으로 빼 두면 코드를 고치지 않고 같은 조건으로 실험을 반복(재현)할 수 있습니다. 잘못된 값은 AI 를 부르기 **전에** 막아 비용을 아낍니다. |
-| 수정할 파일 | `ai_gitgen/cli.py` — `build_parser()`, `validate_options()` |
+| 수정할 파일 | `ai_gitgen/cli.py` — `build_parser()`, `validate_options()` · 명세: [`docs/modules/cli.md`](modules/cli.md) |
 | 사용하는 것 | 표준 라이브러리 `argparse` / 프로젝트 `config.py` 상수 |
 
 **TODO**
@@ -161,7 +162,7 @@ Namespace(command='commit', model='claude-haiku-4-5', temperature=0.3, max_token
 |---|---|
 | 무엇을 만드는가 | Python 에서 `git` 을 실행해 **변경 파일 목록**과 **diff 텍스트**, **현재 브랜치**를 얻는 함수들 |
 | 왜 필요한가 | 공식 요구 1: `git status` 로 변경 파일, `git diff` 로 변경 내용. AI 가 읽을 "재료"입니다. AI 호출과 분리하면 AI 없이도 이 부분만 테스트할 수 있습니다. |
-| 수정할 파일 | `ai_gitgen/git_collector.py` — 7개 함수 |
+| 수정할 파일 | `ai_gitgen/git_collector.py` — 7개 함수 · 명세: [`docs/modules/git_collector.md`](modules/git_collector.md) |
 | 사용하는 것 | 표준 라이브러리 `subprocess` / 파이썬 기본 문자열 메서드 `splitlines`, `strip`, `split`, 슬라이싱 |
 
 **TODO** (위에서부터 순서대로)
@@ -239,7 +240,7 @@ python -m learning_kit.practice 2
 |---|---|
 | 무엇을 만드는가 | diff 안의 API Key·이메일 등을 `[MASKED]` 로 가리는 함수 (A), (선택) diff 를 최대 10파일·200줄로 자르는 함수 (B), 이를 묶는 `--safe-mode` 함수 |
 | 왜 필요한가 | 공식 제약: diff 속 민감정보를 프롬프트에 넣지 않도록 (A) 마스킹 또는 (B) 일부만 전송 중 **1개 이상**. 이 실습은 (A)를 필수, (B)를 선택으로 둡니다. (B)까지 하면 보내는 양이 줄어 **비용**도 줄어듭니다. |
-| 수정할 파일 | `ai_gitgen/safety.py` — `SENSITIVE_PATTERNS`, `mask_sensitive()`, `limit_diff()`, `apply_safe_mode()` |
+| 수정할 파일 | `ai_gitgen/safety.py` — `SENSITIVE_PATTERNS`, `mask_sensitive()`, `limit_diff()`, `apply_safe_mode()` · 명세: [`docs/modules/safety.md`](modules/safety.md) |
 | 사용하는 것 | 표준 라이브러리 `re` (정규표현식) |
 
 **TODO**
@@ -312,7 +313,7 @@ python -m learning_kit.practice_repo secret   # 가짜 비밀이 든 연습 저�
 |---|---|
 | 무엇을 만드는가 | 변경 파일 목록 + diff + 규칙을 담은 **AI 요청문(문자열)** 2종 (커밋용, PR용) |
 | 왜 필요한가 | 미션의 핵심 "어떤 입력을 주냐". AI 는 시킨 것만 압니다. 형식·길이·언어·섹션을 알려 줘야 원하는 결과가 나옵니다. |
-| 수정할 파일 | `ai_gitgen/prompt_builder.py` — `format_file_list()`, `build_commit_prompt()`, `build_pr_prompt()` |
+| 수정할 파일 | `ai_gitgen/prompt_builder.py` — `format_file_list()`, `build_commit_prompt()`, `build_pr_prompt()` · 명세: [`docs/modules/prompt_builder.md`](modules/prompt_builder.md) |
 | 사용하는 것 | 파이썬 기본 f-string, `'\n'.join()` / 프로젝트 `config.py` 상수 |
 
 **TODO**
@@ -376,7 +377,7 @@ python -m learning_kit.practice 4
 |---|---|
 | 무엇을 만드는가 | 환경변수에서 키 읽기 → 헤더·본문 만들기 → HTTP POST → 응답 JSON 에서 글자 꺼내기, 그리고 **모든 실패를 `AIClientError` 로 바꾸기** |
 | 왜 필요한가 | 공식 요구 2: 키는 환경변수, 실패 시 **원인을 포함한** 메시지. REST API 의 요청·응답·예외 흐름을 말로 설명할 수 있어야 합니다(과제 목표 1). |
-| 수정할 파일 | `ai_gitgen/ai_client.py` — 6개 함수 |
+| 수정할 파일 | `ai_gitgen/ai_client.py` — 6개 함수 · 명세: [`docs/modules/ai_client.md`](modules/ai_client.md) |
 | 사용하는 것 | 표준 라이브러리 `os`, `json`, `urllib.request`, `urllib.error` |
 
 **TODO**
@@ -469,7 +470,7 @@ python -m learning_kit.practice 5
 |---|---|
 | 무엇을 만드는가 | AI 글을 제목/본문으로 나누고, 길이·형식 규칙을 검사하고, 구획을 나눠 출력하는 함수들 |
 | 왜 필요한가 | 공식 요구 5: 커밋 제목 50(72)자, PR 제목 80자, PR 섹션·불릿 규칙 + 구분선. AI 는 규칙을 가끔 어기므로 받은 뒤 **프로그램이 다시 확인**합니다. |
-| 수정할 파일 | `ai_gitgen/formatter.py` — 7개 함수 |
+| 수정할 파일 | `ai_gitgen/formatter.py` — 7개 함수 · 명세: [`docs/modules/formatter.md`](modules/formatter.md) |
 | 사용하는 것 | 파이썬 기본 `len`, `str.splitlines`, `str.strip`, `str.startswith`, 슬라이싱 / `config.py` |
 
 **TODO**
@@ -533,7 +534,7 @@ python -m learning_kit.practice 6
 |---|---|
 | 무엇을 만드는가 | Step 1~6 함수를 순서대로 부르는 `run_commit()`, `run_pr()`, `main()` |
 | 왜 필요한가 | 공식 결과물 ①: **한 번 실행으로 자동화 흐름이 끝까지 동작**. 체크리스트 항목 1 의 대부분을 여기서 만족합니다. |
-| 수정할 파일 | `ai_gitgen/cli.py` — `run_commit()`, `run_pr()`, `main()` |
+| 수정할 파일 | `ai_gitgen/cli.py` — `run_commit()`, `run_pr()`, `main()` · 명세: [`docs/modules/cli.md`](modules/cli.md) |
 | 사용하는 것 | 프로젝트 함수 전부 + `log()` (✅ 구현됨) |
 
 **TODO**
@@ -542,7 +543,7 @@ python -m learning_kit.practice 6
 - [ ] `run_commit(args, cwd, transport)` — 교재 '커밋 메시지 생성 흐름' 8단계
 - [ ] `run_pr(args, cwd, transport)` — 브랜치 로그 포함
 - [ ] 모든 단계에 `cwd` 와 `transport` 를 **끝까지 넘기기**
-- [ ] `GitCommandError`, `AIClientError` 를 잡아 `[ERROR]` + 종료 코드 1
+- [ ] 공통 예외(`GitCommandError`, `AIClientError`)는 `main()` 위에 붙인 **데코레이터 한 곳**에서 `[ERROR]` + 원인·해결 힌트 + 종료 코드 1 — `run_commit`/`run_pr` 에서 같은 `try/except` 를 반복하지 않기 (가이드라인 5·6절, 설계 표: `docs/modules/cli.md`)
 - [ ] AI 호출 횟수 로그 (`[DONE] ... (API 호출 1회)`)
 - [ ] (선택) `--dry-run`: 프롬프트만 출력하고 0
 
@@ -562,6 +563,8 @@ run_commit:
 ```
 
 - `main.py` 는 `main()` 을 인자 없이 부릅니다. `argv=None` 이면 `parse_args(None)` 이 실제 명령줄을 읽습니다.
+- 실제로 동작하는 데코레이터 예는 `main.py` 의 `show_todo_hint` 입니다. `functools.wraps` 를 쓰면 감싼 뒤에도 `main` 의 매개변수가 유지되어 기본 테스트(함수 약속)가 계속 통과합니다.
+- `run_commit` 과 `run_pr` 의 공통 부분(변경 수집 → safe-mode → AI 호출)은 공통 함수로 분리해 중복을 줄이세요 (가이드라인 3절).
 - 출력 예: `practice_data/expected_outputs/` 의 세 파일
 
 **실행 명령**

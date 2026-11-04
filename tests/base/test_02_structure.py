@@ -33,6 +33,16 @@ REQUIRED_FILES = [
     'docs/B3-2_STUDY_GUIDE.html',
     'docs/PRACTICE_STEPS.md',
     'docs/REQUIREMENTS_ANALYSIS.md',
+    'docs/architecture.md',
+    'docs/modules/main.md',
+    'docs/modules/config.md',
+    'docs/modules/cli.md',
+    'docs/modules/git_collector.md',
+    'docs/modules/safety.md',
+    'docs/modules/prompt_builder.md',
+    'docs/modules/ai_client.md',
+    'docs/modules/formatter.md',
+    'CODYSSEY_CODING_GUIDELINES.md',
     'docs/templates/README_TEMPLATE.md',
     'docs/templates/MY_ANSWERS.md',
     'practice_data/README.md',
@@ -119,8 +129,7 @@ class StructureTest(unittest.TestCase):
             for func_name, expected in functions.items():
                 with self.subTest(function=f'{module_name}.{func_name}'):
                     func = getattr(module, func_name, None)
-                    self.assertTrue(callable(func),
-                                    f'{func_name} 함수가 없습니다.')
+                    self.assertTrue(callable(func), f'{func_name} 함수가 없습니다.')
                     params = list(inspect.signature(func).parameters)
                     self.assertEqual(
                         params[:len(expected)], expected,

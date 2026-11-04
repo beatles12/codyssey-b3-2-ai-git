@@ -144,6 +144,7 @@ pre code { background: none; padding: 0; font-size: inherit; color: inherit; }
 .badge-std { color: var(--done); background: var(--done-bg); }
 .badge-project { color: var(--todo); background: var(--todo-bg); }
 .badge-data { color: var(--muted); background: var(--surface-2); border-color: var(--border); }
+.badge-syntax { color: var(--warn); background: var(--warn-bg); }
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; margin: 12px 0; box-shadow: var(--shadow); }
 .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
 .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; }
@@ -246,7 +247,7 @@ details > .inner { padding: 6px 16px 12px; }
     <li><a href="#commit-flow">6. 커밋 메시지 생성 흐름</a></li>
     <li><a href="#pr-flow">7. PR 설명 생성 흐름</a></li>
     <li><a href="#call-flow">8. 함수 호출 흐름도</a></li>
-    <li><a href="#function-kinds">9. 기본 함수·표준 라이브러리·프로젝트 함수</a></li>
+    <li><a href="#function-kinds">9. 기본 함수·표준 라이브러리·문법·프로젝트</a></li>
     <li class="group">직접 만들기</li>
     <li><a href="#steps">10. 단계별 TODO 연습</a></li>
     <li class="indent"><a href="#step1">Step 1 · CLI 옵션</a></li>
@@ -289,7 +290,7 @@ details > .inner { padding: 6px 16px 12px; }
   <div class="card"><span class="badge badge-todo">🧩 TODO · 직접 구현</span><p>함수 이름과 설명만 있고 본문은 <code>raise NotImplementedError</code> 입니다. 이 부분을 내가 채웁니다.</p></div>
   <div class="card"><span class="badge badge-example">📘 예시 · 정답 아님</span><p>미션과 다른 예제로 문법이나 표준 라이브러리 사용법만 보여 줍니다. 그대로 붙여 넣어도 테스트를 통과하지 않습니다.</p></div>
 </div>
-<p>함수 종류 표시: <span class="badge badge-builtin">기본 함수</span> import 없이 쓰는 것 · <span class="badge badge-std">표준 라이브러리</span> Python에 들어 있지만 import 가 필요한 것 · <span class="badge badge-project">프로젝트 함수</span> 이 저장소에서 만든 것 (자세히: <a href="#function-kinds">9절</a>)</p>
+<p>코드 종류 표시 (CODYSSEY 가이드라인 8절의 네 가지): <span class="badge badge-builtin">기본 함수</span> import 없이 쓰는 것 · <span class="badge badge-syntax">문법/개념</span> <code>def</code>·<code>raise</code>·데코레이터 같은 언어 규칙 · <span class="badge badge-std">표준 라이브러리</span> Python에 들어 있지만 import 가 필요한 것 · <span class="badge badge-project">프로젝트 함수</span> 이 저장소에서 만든 것 (자세히: <a href="#function-kinds">9절</a>)</p>
 <div class="callout">
   <p><strong>권장 읽기 순서</strong>: 1~9절(원리, 약 3시간) → 10절 Step 1~8(실습) → 11~15절(확인·발표 준비). 실습 중에는 이 교재와 <code>docs/PRACTICE_STEPS.md</code> 를 나란히 띄워 두세요.</p>
 </div>
@@ -833,7 +834,7 @@ print(bool(home.strip()))               # 값이 있나?
   <text x="438" y="719" text-anchor="middle">위반</text>
   </g>
 </svg>
-<figcaption>그림 4. 커밋 메시지 생성 흐름. ⑧ 이전의 분기에서는 AI 를 부르지 않으므로 비용이 0 입니다. (②와 ⑦의 순서는 바꿔도 됩니다.)</figcaption>
+<figcaption>그림 4. 커밋 메시지 생성 흐름. ⑧ 이전의 분기에서는 AI 를 부르지 않으므로 비용이 0 입니다. (②와 ⑦의 순서는 바꿔도 됩니다.) 빨간 오류 종료는 하위 함수가 예외를 raise 하면 <code>main()</code> 에 붙인 공통 예외 데코레이터 한 곳에서 출력합니다 (가이드라인 5절).</figcaption>
 </figure>
 <div class="grid-2">
 <div class="card"><strong>커밋 메시지 형식 (공식)</strong>
@@ -1007,8 +1008,8 @@ print(bool(home.strip()))               # 값이 있나?
 <figcaption>그림 6. 함수 호출 순서 (commit, 정상 흐름). 파랑 = 인터넷으로 나가는 호출</figcaption>
 </figure>
 <div class="codebox"><div class="label">같은 내용을 글로 — 들여쓰기 = "안에서 부른다"</div>
-<pre><code>main.py: run()                                              ✅ 구현됨
-└─ cli.main(argv=None, cwd=None, transport=None)            🧩 Step 7
+<pre><code>main.py: run()                      @show_todo_hint          ✅ 구현됨
+└─ cli.main(argv=None, cwd=None, transport=None)  @공통 예외 데코레이터  🧩 Step 7
    ├─ build_parser().parse_args(argv)                       🧩 Step 1
    ├─ validate_options(args)                                🧩 Step 1
    └─ run_commit(args, cwd, transport)                      🧩 Step 7
@@ -1039,9 +1040,10 @@ print(bool(home.strip()))               # 값이 있나?
 
 <!-- ================================================================== -->
 <section id="function-kinds">
-<h2><span class="num">9.</span>Python 기본 함수 · 표준 라이브러리 · 프로젝트 함수 구분</h2>
+<h2><span class="num">9.</span>Python 기본 함수 · 표준 라이브러리 · 문법/개념 · 프로젝트 코드 구분</h2>
 <p>코드를 읽다가 처음 보는 이름이 나오면 <strong>"이건 누가 만든 것인가?"</strong>부터 확인하세요. 어디서 설명을 찾을지가 달라집니다.</p>
-<div class="grid-3">
+<p class="small">CODYSSEY 코딩 가이드라인 8절은 코드를 공부할 때 아래 <strong>네 종류</strong>를 구분하라고 합니다.</p>
+<div class="grid-2">
 <div class="card"><span class="badge badge-builtin">기본 함수 · 자료형 메서드</span>
 <p><strong>import 없이</strong> 바로 쓰는 것. Python 이 처음부터 제공합니다.</p>
 <p><code>print</code> <code>len</code> <code>int</code> <code>float</code> <code>str</code> <code>list</code> <code>dict</code> <code>isinstance</code> <code>any</code> <code>all</code> <code>enumerate</code> <code>sorted</code></p>
@@ -1055,9 +1057,13 @@ print(bool(home.strip()))               # 값이 있나?
 <div class="card"><span class="badge badge-project">프로젝트 함수</span>
 <p>이 저장소에서 <strong>우리가 만든</strong> 함수. <code>from ai_gitgen import ...</code> 로 가져옵니다.</p>
 <p><code>git_collector.get_diff</code> <code>safety.mask_sensitive</code> <code>ai_client.call_ai_api</code> …</p>
-<p class="small">설명: 그 함수의 docstring (파일을 열거나 <code>help(git_collector.get_diff)</code>)</p></div>
+<p class="small">설명: 함수 위 한 줄 설명 + 상세 명세 <code>docs/modules/&lt;모듈&gt;.md</code></p></div>
+<div class="card"><span class="badge badge-syntax">Python 문법 / 개념</span>
+<p>함수가 아니라 <strong>Python 언어 자체의 규칙</strong>. import 도 호출도 하지 않습니다.</p>
+<p><code>def</code> <code>class</code> <code>return</code> <code>if</code>/<code>for</code> <code>try</code>/<code>except</code>/<code>raise</code> <code>with</code> <code>import</code> <code>lambda</code> 데코레이터 <code>@</code> f-string 리스트 컴프리헨션</p>
+<p class="small">설명: Python 공식 튜토리얼 (예: "Errors and Exceptions", "Defining Functions")</p></div>
 </div>
-<div class="callout"><p><strong>네 번째 종류: 외부 패키지</strong> (<code>pip install requests</code> 같은 것). 이 프로젝트는 쓰지 않습니다. 표준 라이브러리만으로 REST API 를 부르는 과정을 직접 이해하기 위해서입니다.</p></div>
+<div class="callout"><p><strong>그 밖의 종류: 외부 패키지</strong> (<code>pip install requests</code> 같은 것). 이 프로젝트는 쓰지 않습니다. 표준 라이브러리만으로 REST API 를 부르는 과정을 직접 이해하기 위해서입니다.</p></div>
 <h3>구별하는 법</h3>
 <div class="table-wrap"><table>
 <tr><th>코드</th><th>위쪽에 있는 import</th><th>종류</th></tr>
@@ -1066,39 +1072,47 @@ print(bool(home.strip()))               # 값이 있나?
 <tr><td><code>json.dumps(body)</code></td><td><code>import json</code></td><td><span class="badge badge-std">표준</span></td></tr>
 <tr><td><code>git_collector.run_git(['diff'])</code></td><td><code>from ai_gitgen import git_collector</code></td><td><span class="badge badge-project">프로젝트</span></td></tr>
 <tr><td><code>config.COMMIT_TITLE_MAX</code></td><td><code>from ai_gitgen import config</code></td><td><span class="badge badge-project">프로젝트 상수</span></td></tr>
+<tr><td><code>raise GitCommandError(...)</code></td><td><code>from ai_gitgen.git_collector import ...</code></td><td><span class="badge badge-syntax">문법</span> <code>raise</code> + <span class="badge badge-project">프로젝트</span> 예외 클래스</td></tr>
+<tr><td><code>@show_todo_hint</code></td><td>(같은 파일 <code>main.py</code>)</td><td><span class="badge badge-syntax">문법</span> 데코레이터 + <span class="badge badge-project">프로젝트</span> 함수</td></tr>
 </table></div>
 <h3>단계별로 쓰게 될 것</h3>
 <div class="table-wrap"><table>
-<tr><th>단계</th><th><span class="badge badge-builtin">기본</span></th><th><span class="badge badge-std">표준 라이브러리</span></th><th><span class="badge badge-project">프로젝트</span> (만들 함수)</th></tr>
-<tr><td>1</td><td><code>float</code> <code>int</code> 비교 연산</td><td><code>argparse</code></td><td><code>build_parser</code> <code>validate_options</code></td></tr>
-<tr><td>2</td><td><code>.splitlines</code> <code>.strip</code> <code>.split</code> 슬라이싱 <code>len</code></td><td><code>subprocess</code></td><td><code>run_git</code> <code>is_git_repository</code> <code>parse_status_output</code> <code>get_changed_files</code> <code>get_diff</code> <code>count_diff_lines</code> <code>get_current_branch</code></td></tr>
-<tr><td>3</td><td><code>.splitlines(keepends=True)</code> <code>''.join</code></td><td><code>re</code></td><td><code>mask_sensitive</code> <code>limit_diff</code> <code>apply_safe_mode</code></td></tr>
-<tr><td>4</td><td>f-string <code>'\n'.join</code></td><td>—</td><td><code>format_file_list</code> <code>build_commit_prompt</code> <code>build_pr_prompt</code></td></tr>
-<tr><td>5</td><td><code>dict</code> 다루기 <code>try/except</code> <code>raise</code></td><td><code>os</code> <code>json</code> <code>urllib.request</code> <code>urllib.error</code></td><td><code>get_api_key</code> <code>build_headers</code> <code>build_request_body</code> <code>extract_text</code> <code>send_http_request</code> <code>call_ai_api</code></td></tr>
-<tr><td>6</td><td><code>len</code> <code>.startswith</code> <code>.lstrip</code> 슬라이싱</td><td>—</td><td><code>split_title_body</code> <code>shorten_title</code> <code>validate_*</code> <code>format_*</code></td></tr>
-<tr><td>7</td><td><code>print</code></td><td>(<code>sys</code> — <code>log</code> 가 사용)</td><td><code>run_commit</code> <code>run_pr</code> <code>main</code> + 위의 모든 함수</td></tr>
+<tr><th>단계</th><th><span class="badge badge-builtin">기본</span></th><th><span class="badge badge-std">표준 라이브러리</span></th><th><span class="badge badge-syntax">문법/개념</span></th><th><span class="badge badge-project">프로젝트</span> (만들 함수)</th></tr>
+<tr><td>1</td><td><code>float</code> <code>int</code> 비교 연산</td><td><code>argparse</code></td><td><code>def</code>, 기본값 매개변수, 비교 연산</td><td><code>build_parser</code> <code>validate_options</code></td></tr>
+<tr><td>2</td><td><code>.splitlines</code> <code>.strip</code> <code>.split</code> 슬라이싱 <code>len</code></td><td><code>subprocess</code></td><td><code>class</code>(예외), <code>try/except</code>, <code>raise</code>, 슬라이싱</td><td><code>run_git</code> <code>is_git_repository</code> <code>parse_status_output</code> <code>get_changed_files</code> <code>get_diff</code> <code>count_diff_lines</code> <code>get_current_branch</code></td></tr>
+<tr><td>3</td><td><code>.splitlines(keepends=True)</code> <code>''.join</code></td><td><code>re</code></td><td>정규식 문자열 <code>r'...'</code>, <code>for</code></td><td><code>mask_sensitive</code> <code>limit_diff</code> <code>apply_safe_mode</code></td></tr>
+<tr><td>4</td><td>f-string <code>'\n'.join</code></td><td>—</td><td>f-string, 제너레이터 식</td><td><code>format_file_list</code> <code>build_commit_prompt</code> <code>build_pr_prompt</code></td></tr>
+<tr><td>5</td><td><code>dict</code> 다루기, <code>str.strip</code></td><td><code>os</code> <code>json</code> <code>urllib.request</code> <code>urllib.error</code></td><td><code>try/except</code>, <code>raise ... from</code>, <code>with</code>, 예외 상속</td><td><code>get_api_key</code> <code>build_headers</code> <code>build_request_body</code> <code>extract_text</code> <code>send_http_request</code> <code>call_ai_api</code></td></tr>
+<tr><td>6</td><td><code>len</code> <code>.startswith</code> <code>.lstrip</code> 슬라이싱</td><td>—</td><td>튜플 반환·언패킹, 조건문</td><td><code>split_title_body</code> <code>shorten_title</code> <code>validate_*</code> <code>format_*</code></td></tr>
+<tr><td>7</td><td><code>print</code></td><td><code>sys</code>, (데코레이터에) <code>functools</code></td><td>데코레이터 <code>@</code>, 함수를 값으로 넘기기</td><td><code>run_commit</code> <code>run_pr</code> <code>main</code> + 위의 모든 함수</td></tr>
 </table></div>
 <h3>이미 구현된 코드 읽어 보기</h3>
 <div class="codebox"><div class="label"><span class="badge badge-done">✅ 구현됨</span> <span class="file">ai_gitgen/cli.py</span> — 기본 함수 <code>print</code> 와 표준 라이브러리 <code>sys</code> 를 함께 쓴 예</div>
 <pre><code>def log(level, message):
-    """머리표([INFO], [DONE], [WARN], [ERROR])를 붙여 한 줄을 출력한다."""
+    """머리표([INFO] 등)를 붙여 한 줄 출력한다. [ERROR] 만 표준 오류로 보낸다."""
     stream = sys.stderr if level == 'ERROR' else sys.stdout
     print(f'[{level}] {message}', file=stream)</code></pre></div>
-<div class="codebox"><div class="label"><span class="badge badge-done">✅ 구현됨</span> <span class="file">main.py</span> — 아직 TODO 인 함수가 불리면 친절한 안내를 출력</div>
-<pre><code>def run():
-    try:
-        return main()
-    except NotImplementedError as error:
-        print(f'[TODO] 아직 구현하지 않은 기능입니다: {error}')
-        print('[TODO] START_HERE.md 와 docs/PRACTICE_STEPS.md 를 참고하세요.')
-        return 3</code></pre></div>
-<div class="codebox"><div class="label"><span class="badge badge-todo">🧩 TODO</span> <span class="file">ai_gitgen/git_collector.py</span> — 지금 모습 (docstring 일부)</div>
+<div class="codebox"><div class="label"><span class="badge badge-done">✅ 구현됨</span> <span class="file">main.py</span> — 진입점에 한 번 붙인 데코레이터 (가이드라인 5·6절). TODO 함수가 불리면 Traceback 대신 안내</div>
+<pre><code>def show_todo_hint(func):
+    """[학습 지원] TODO 함수가 불리면 Traceback 대신 남은 단계를 안내한다."""
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except NotImplementedError as error:
+            print(f'[TODO] 아직 구현하지 않은 기능입니다: {error}')
+            print('[TODO] START_HERE.md 와 docs/PRACTICE_STEPS.md 를 참고하세요.')
+            return 3
+    return wrapper
+
+
+@show_todo_hint
+def run():
+    """프로그램을 실행하고 종료 코드(0=정상)를 돌려준다."""
+    return main()</code></pre></div>
+<div class="codebox"><div class="label"><span class="badge badge-todo">🧩 TODO</span> <span class="file">ai_gitgen/git_collector.py</span> — 지금 모습. 함수 위에는 한 줄 설명만 두고, 입력·출력·규칙·[함정 주의]는 <code>docs/modules/git_collector.md</code> 에 있습니다 (가이드라인 2·7절)</div>
 <pre><code>def parse_status_output(status_text):
-    """`git status --porcelain` 출력 문자열을 파일 목록으로 바꾼다.
-    ...
-    [함정 주의] 줄 전체에 .strip() 을 먼저 하면 ' M' 의 앞 공백이 사라져
-    글자 위치가 한 칸씩 밀린다.
-    """
+    """git status --porcelain 출력을 파일 목록 [{code, path}] 으로 바꾼다."""
     # TODO(Step 2): 아래 줄을 지우고 직접 구현하세요.
     raise NotImplementedError('Step 2 - git_collector.parse_status_output()')</code></pre></div>
 </section>
@@ -1486,7 +1500,7 @@ $ python -m learning_kit.practice 6
 <li><input type="checkbox" data-key="s7-2"><span><code>run_commit</code>: <a href="#commit-flow">6절 흐름도</a>의 ①~⑪</span></li>
 <li><input type="checkbox" data-key="s7-3"><span><code>run_pr</code>: <a href="#pr-flow">7절 흐름도</a> (브랜치 로그 포함)</span></li>
 <li><input type="checkbox" data-key="s7-4"><span><code>cwd</code> 와 <code>transport</code> 를 <strong>끝까지</strong> 넘기기</span></li>
-<li><input type="checkbox" data-key="s7-5"><span><code>GitCommandError</code>, <code>AIClientError</code> → <code>[ERROR]</code> + 종료 코드 1</span></li>
+<li><input type="checkbox" data-key="s7-5"><span>공통 예외(<code>GitCommandError</code>, <code>AIClientError</code>)는 <code>main()</code> 위에 붙인 <strong>데코레이터 한 곳</strong>에서 <code>[ERROR]</code> + 원인·해결 힌트 + 종료 코드 1 — <code>run_commit</code>/<code>run_pr</code> 에서 같은 <code>try/except</code> 반복 금지 (가이드라인 5·6절)</span></li>
 <li><input type="checkbox" data-key="s7-6"><span>AI 호출 횟수 로그 · (선택) <code>--dry-run</code></span></li>
 </ul>
 <details><summary>💡 힌트 보기 — 흐름을 말로 먼저 쓰기 (코드 아님)</summary><div class="inner">
@@ -1501,6 +1515,8 @@ $ python -m learning_kit.practice 6
   제목/본문 나누기 → 규칙 적용 → 문제는 [WARN]
   구획 출력 → 0</code></pre>
 <ul><li><code>main.py</code> 는 <code>main()</code> 을 인자 없이 부릅니다. <code>parse_args(None)</code> 은 실제 명령줄을 읽습니다.</li>
+<li>실제로 동작하는 데코레이터 예는 <code>main.py</code> 의 <code>show_todo_hint</code> 입니다. <code>functools.wraps</code> 를 쓰면 감싼 뒤에도 <code>main</code> 의 매개변수가 유지되어 기본 테스트(함수 약속)가 계속 통과합니다. 설계 표: <code>docs/modules/cli.md</code> 의 "예외 처리 설계"</li>
+<li><code>run_commit</code> 과 <code>run_pr</code> 의 공통 부분은 공통 함수로 분리해 중복을 줄이세요 (가이드라인 3절).</li>
 <li>출력 예: <code>practice_data/expected_outputs/</code></li></ul></div></details>
 <details><summary>🔍 스스로 확인하는 방법</summary><div class="inner">
 <pre><code>python -m learning_kit.demo 7                # 가짜 AI 로 5가지 상황
@@ -1691,7 +1707,11 @@ python -m learning_kit.practice 3 -v</code></pre>
         env_patcher = mock.patch.dict(os.environ, {}, clear=False)
         env_patcher.start()
         self.addCleanup(env_patcher.stop)
-        os.environ.pop('AI_API_KEY', None)</code></pre></div>
+        os.environ.pop('AI_API_KEY', None)
+        # 임시 폴더 위쪽(예: 실수로 git init 한 홈)의 저장소를 git 이 찾지 않게 한다
+        temp_root = tempfile.gettempdir()
+        os.environ['GIT_CEILING_DIRECTORIES'] = os.pathsep.join(
+            dict.fromkeys([temp_root, os.path.realpath(temp_root)]))</code></pre></div>
 <div class="codebox"><div class="label"><span class="badge badge-done">✅ 구현됨</span> <span class="file">tests/practice/test_step7_flow.py</span> — 공식 체크리스트 "API Key 없이 실행하면 오류 후 종료"를 확인하는 실제 테스트</div>
 <pre><code>    def test_missing_api_key(self):
         """API Key 없음: [ERROR] + AI_API_KEY 안내, AI 호출 0회, 종료 코드 1"""
@@ -1814,7 +1834,7 @@ python -m learning_kit.practice 3 -v</code></pre>
 
 <div class="footer">
 <p>B3-2 학습 교재 · 저장소의 <code>docs/B3-2_STUDY_GUIDE.html</code>. 공식 자료(미션 PDF·체크리스트)가 우선이며, 이 교재의 예시는 정답이 아닙니다.</p>
-<p>함께 보기: <code>START_HERE.md</code> · <code>docs/PRACTICE_STEPS.md</code> · <code>docs/REQUIREMENTS_ANALYSIS.md</code> · <code>docs/templates/</code></p>
+<p>함께 보기: <code>START_HERE.md</code> · <code>docs/PRACTICE_STEPS.md</code> · <code>docs/architecture.md</code> · <code>docs/modules/</code> · <code>docs/REQUIREMENTS_ANALYSIS.md</code> · <code>docs/templates/</code> · <code>CODYSSEY_CODING_GUIDELINES.md</code></p>
 </div>
 </main>
 </div>

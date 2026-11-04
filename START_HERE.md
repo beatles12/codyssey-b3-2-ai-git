@@ -3,7 +3,7 @@
 이 저장소는 코디세이 **B3-2 「내가 고친 코드 설명을 AI가 대신 써주는 도우미 만들기」** 를
 **직접 구현하면서 원리를 이해하기 위한 실습 환경**입니다.
 
-- ✅ 준비된 것: 폴더 구조, 함수 이름과 설명(docstring), 연습 데이터, 가짜 AI, 자동 테스트, 교재
+- ✅ 준비된 것: 폴더 구조, 함수 이름과 한 줄 설명, 함수별 명세 문서(`docs/modules/`), 연습 데이터, 가짜 AI, 자동 테스트, 교재
 - 🧩 직접 할 것: `ai_gitgen/` 안의 **TODO 함수 본문** (미션 완성 코드는 들어 있지 않습니다)
 - 🔒 실제 AI API 는 **Step 8 에서 한두 번만** 씁니다. 그 전까지는 키 없이, 비용 없이 연습합니다.
 
@@ -66,7 +66,7 @@ python -m learning_kit.practice
 ### 각 Step 에서 반복하는 5단계
 
 ```text
-1. 읽기   : 교재/워크북의 Step N  (무엇을, 왜, 힌트)
+1. 읽기   : 교재/워크북의 Step N  (무엇을, 왜, 힌트) + docs/modules/<모듈>.md (함수 명세)
 2. 구현   : 해당 파일의 TODO 함수 본문 작성 (raise NotImplementedError 줄 지우기)
 3. 눈으로 : python -m learning_kit.demo N
 4. 채점   : python -m learning_kit.practice N        (-v 를 붙이면 자세히)
@@ -99,6 +99,7 @@ python -m learning_kit.practice
 codyssey-b3-2-ai-git/
 ├── START_HERE.md            ← 지금 읽는 파일
 ├── README.md                ← Step 8 에서 제출용으로 다시 작성
+├── CODYSSEY_CODING_GUIDELINES.md  코디세이 공통 코딩 기준
 ├── main.py                  ✅ 실행 파일: python main.py commit / pr
 ├── ai_gitgen/               🧩 미션 코드 (내가 구현)
 │   ├── config.py            ✅ 기본값 (50/72/80자, 10파일/200줄, 모델 …)
@@ -116,7 +117,9 @@ codyssey-b3-2-ai-git/
 └── docs/
     ├── B3-2_STUDY_GUIDE.html   교재 (오프라인)
     ├── PRACTICE_STEPS.md       단계별 워크북
-    ├── REQUIREMENTS_ANALYSIS.md 공식 요구사항 분석
+    ├── REQUIREMENTS_ANALYSIS.md 공식 요구사항 분석 · 가이드라인 적용
+    ├── architecture.md         구조 · 데이터 흐름 · 설계 이유 · 한계
+    ├── modules/                모듈별 문서 (함수 입력·출력·호출 관계 = 명세)
     └── templates/              README 작성 틀, 설명 답안 노트
 ```
 
@@ -149,7 +152,7 @@ codyssey-b3-2-ai-git/
 
 ## 8. 알아 둘 점 (준비 과정에서 확인된 사항)
 
-- **코딩 가이드라인 파일 없음**: `CODYSSEY_CODING_GUIDELINES.md` 를 받지 못해 일반 PEP 8 기준으로 작성했습니다. 받으면 저장소 루트에 넣고 기준을 비교하세요. (`docs/REQUIREMENTS_ANALYSIS.md` 7절)
+- **코딩 가이드라인**: 저장소 루트의 `CODYSSEY_CODING_GUIDELINES.md` 를 따릅니다. 함수 위에는 한 줄 설명만 두고, 상세 명세는 `docs/modules/` 에 둡니다. 공통 예외는 `main()` 에 붙인 데코레이터 한 곳에서 처리합니다. (`docs/REQUIREMENTS_ANALYSIS.md` 7절)
 - **AI 제공자 미정**: 공식 미션은 제공자를 정하지 않습니다. `config.py` 에 anthropic / openai 두 형식을 준비했습니다. 필수 테스트는 `config.DEFAULT_PROVIDER` 에 고른 형식 하나만 확인하고, 다른 형식은 (선택) 테스트입니다.
 - **temperature 지원 여부**: 최신 모델 중에는 temperature 를 거부(HTTP 400)하는 모델이 있습니다. 기본 모델은 temperature 를 받는 모델로 두었습니다. OpenAI 추론 계열 모델은 `max_tokens` 대신 `max_completion_tokens` 를 요구합니다. 실제 사용 전 제공자 문서를 꼭 확인하세요.
 - **필수와 선택**: `(선택)` 이 붙은 테스트는 공식 미션 필수가 아닙니다. 예: safe-mode 의 전송 제한(B), 다른 제공자 형식, `--dry-run`.
