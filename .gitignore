@@ -1,0 +1,22 @@
+# Python 실행 중 자동으로 생기는 파일
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# 가상환경
+.venv/
+venv/
+
+# 비밀키 보관 파일은 절대 커밋하지 않습니다 (AI API Key 는 환경변수로만 관리)
+.env
+.env.*
+*.key
+
+# python -m learning_kit.practice_repo 로 만드는 연습용 Git 저장소
+practice_repo/
+
+# 편집기/OS 파일
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
