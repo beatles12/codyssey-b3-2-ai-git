@@ -262,7 +262,10 @@ def create_practice_repo(target=PRACTICE_REPO_DIR, scenario='feature'):
     for relative_path, content in BASE_FILES.items():
         _write(target, relative_path, content)
     _git(target, 'add', '.')
-    _git(target, 'commit', '-q', '-m', 'chore: 할 일 관리 앱 초기 버전')
+    # --no-verify: 사용자 전역 설정의 commit hook 이 연습 저장소 생성을
+    # 막지 않도록 한다.
+    _git(target, 'commit', '-q', '--no-verify', '-m',
+         'chore: 할 일 관리 앱 초기 버전')
 
     _apply_scenario(target, scenario)
     return target

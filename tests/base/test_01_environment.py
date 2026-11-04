@@ -1,5 +1,6 @@
 """기본 환경 테스트 1 — Python / Git / 실행 파일."""
 
+import os
 import subprocess
 import sys
 import unittest
@@ -27,10 +28,12 @@ class EnvironmentTest(unittest.TestCase):
 
     def test_main_py_runs_without_traceback(self):
         """python main.py --help 가 긴 오류(Traceback) 없이 끝난다"""
+        # 진짜 API Key 가 있어도 테스트에서는 절대 쓰이지 않도록 뺀다.
+        env = {k: v for k, v in os.environ.items() if k != 'AI_API_KEY'}
         result = subprocess.run(
             [sys.executable, 'main.py', '--help'], cwd=PROJECT_ROOT,
             capture_output=True, text=True, encoding='utf-8',
-            errors='replace', timeout=60)
+            errors='replace', timeout=60, env=env)
         self.assertNotIn('Traceback', result.stderr + result.stdout)
         # 0 = 도움말 출력(구현 후), 3 = [TODO] 안내(구현 전)
         self.assertIn(result.returncode, (0, 3))

@@ -44,6 +44,11 @@ class PracticeTestCase(unittest.TestCase):
         env_patcher.start()
         self.addCleanup(env_patcher.stop)
         os.environ.pop('AI_API_KEY', None)
+        # 임시 폴더 위쪽(예: 실수로 git init 한 홈 폴더)의 저장소를
+        # git 이 찾지 않도록 막는다. "저장소가 아님" 테스트가 정확해진다.
+        temp_root = tempfile.gettempdir()
+        os.environ['GIT_CEILING_DIRECTORIES'] = os.pathsep.join(
+            dict.fromkeys([temp_root, os.path.realpath(temp_root)]))
 
     # --- 데이터 / 폴더 -----------------------------------------------------
     @staticmethod
