@@ -5,9 +5,9 @@ API_KEY_ENV_NAME = 'AI_API_KEY'
 
 # 2. AI 제공자와 모델 기본값 (받은 키의 제공자에 맞춰 고른다)
 DEFAULT_PROVIDER = 'anthropic'
-DEFAULT_MODEL = 'claude-haiku-4-5'
+DEFAULT_MODEL = 'claude-haiku-4'
 PROVIDERS = {
-    'anthropic': {'url': 'https://api.anthropic.com/v1/messages',
+    'anthropic': {'url': 'https://copa.codyssey.kr/v1/messages',
                   'api_version': '2023-06-01'},
     'openai': {'url': 'https://api.openai.com/v1/chat/completions'},
 }

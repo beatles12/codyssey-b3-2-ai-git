@@ -40,20 +40,19 @@ git --version
 
 ## 3. AI API 환경변수 설정
 
-기본 AI 제공자는 Anthropic이며 기본 모델은
-`claude-haiku-4-5`입니다.
+기본 연결은 네이토 AI의 Anthropic 호환 API입니다.
+요청 주소는 `https://copa.codyssey.kr/v1/messages`이고 기본 모델은
+`claude-haiku-4`입니다.
 
-API Key는 Python 코드나 README에 저장하지 않습니다.
-
-PowerShell에서 현재 터미널 세션에만 설정합니다.
+PowerShell에서 발급받은 키를 숨김 입력해 현재 세션의 `AI_API_KEY` 환경변수에 설정합니다.
 
 ```powershell
-$env:AI_API_KEY="YOUR_KEY"
+$natoApiKey = Read-Host '네이토 API Key' -AsSecureString
+$env:AI_API_KEY = $([System.Net.NetworkCredential]::new('', $natoApiKey).Password)
+Remove-Variable natoApiKey
 ```
 
-`YOUR_KEY`는 실제 발급받은 키로 바꾸어 입력해야 합니다.
-
-API Key를 입력한 명령어와 실제 키 값은 GitHub에 올리지 않습니다.
+키 원문을 코드, README, `.env` 등 어떤 파일에도 저장하거나 Git에 올리지 마세요.
 실제 API 호출 시 이용 요금이 발생할 수 있습니다.
 
 ## 4. 실행 방법
@@ -83,17 +82,17 @@ py main.py pr --safe-mode --dry-run
 
 ```powershell
 py main.py commit --temperature 0.2 --max-tokens 300
-py main.py pr --model claude-haiku-4-5 --max-tokens 600
+py main.py pr --model claude-haiku-4 --max-tokens 600
 ```
 
 주요 옵션:
 
 | 옵션 | 설명 | 기본값 |
 |---|---|---|
-| `--model` | 사용할 AI 모델 | claude-haiku-4-5 |
+| `--model` | 사용할 AI 모델 | claude-haiku-4 |
 | `--temperature` | 표현 다양성 조절(0.0~1.0) | 0.3 |
-| `--max-tokens` | AI 출력 길이 상한 | 1024 |
-| `--safe-mode` | API Key 형태·이메일 마스킹 | 꺼짐 |
+| `--max-tokens` | AI 출력 토큰 수 상한(1~4096) | 1024 |
+| `--safe-mode` | Git diff의 특정 API Key 패턴과 이메일 마스킹 | 꺼짐 |
 | `--dry-run` | AI 호출 없이 프롬프트 미리보기 | 꺼짐 |
 
 ## 5. 프로그램 실행 흐름
@@ -112,7 +111,6 @@ py main.py pr --model claude-haiku-4-5 --max-tokens 600
 ## 6. 출력 예시
 
 아래는 가짜 AI를 이용한 모의 실행 결과입니다.
-실제 AI API 출력은 최종 연결 검증 후 확인합니다.
 
 ### 커밋 메시지
 
@@ -150,8 +148,7 @@ feat: 할 일 검색 기능 추가
 ### API Key가 없는 경우
 
 ```text
-[ERROR] AI_API_KEY 환경변수가 설정되지 않았습니다.
-PowerShell에서 환경변수를 설정하세요.
+[ERROR] AI_API_KEY 환경변수가 설정되지 않았습니다. PowerShell에서 환경변수를 설정하세요.
 ```
 
 ### 변경사항이 없는 경우
@@ -184,14 +181,15 @@ AI가 생성할 수 있는 출력의 최대 토큰 수를 지정합니다.
 
 ## 8. 민감정보 보호와 비용 관리
 
-`--safe-mode`는 인식 가능한 `sk-` 형태의 API Key와 이메일을
-`[MASKED]`로 바꿉니다.
+`--safe-mode`는 Git diff 텍스트에서 패턴이 맞는 이메일과 `sk-`로 시작하는
+키 형태(`sk-` 뒤에 영문자·숫자·`_`·`-`가 16자 이상)를 `[MASKED]`로 바꿉니다.
 
 현재 구현의 제한:
 
-- 전화번호와 일반 비밀번호까지 완전히 가리지는 못합니다.
+- 전화번호, 일반 비밀번호, 다른 형태의 키는 diff에 남을 수 있습니다.
+- 프롬프트에 별도로 포함되는 파일 목록과 PR 브랜치명은 원문을 사용합니다.
 - 파일 10개·200줄 전송 제한은 구현하지 않았습니다.
-- Git에 등록하지 않은 새 파일은 이름만 수집될 수 있습니다.
+- 스테이징하지 않은 새 파일은 파일 목록에만 표시되며 내용은 diff에 포함되지 않습니다.
 - AI가 작성한 내용이 항상 정확하다고 보장할 수 없습니다.
 
 실제 AI를 사용하기 전 `--safe-mode --dry-run`으로
@@ -237,7 +235,7 @@ py -m learning_kit.demo 7
 자동 테스트와 시연은 가짜 AI를 사용하므로
 실제 API 호출 비용이 발생하지 않습니다.
 
-실제 API 연동 검증 결과는 별도로 확인합니다.
+실제 네이토 API 연동에서도 커밋 메시지와 PR 초안 생성을 확인했습니다.
 
 ## 11. 학습 및 설계 자료
 

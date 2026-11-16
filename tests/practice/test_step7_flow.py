@@ -100,6 +100,16 @@ class PrFlowTest(FlowTestCase):
             self.assertIn(section, output)
         self.assertEqual(fake.call_count, 1)
 
+    def test_pr_uses_title_after_placeholder(self):
+        title, body = FAKE_PR_TEXT.split('\n\n', 1)
+        response = f'# PR 제목\n\n## {title}\n\n{body}'
+        fake = FakeTransport(text=response)
+        code, output, _fake = self.run_cli(['pr'], transport=fake)
+        self.assertEqual(code, 0, output)
+        self.assertEqual(line_after(output, 'PR Title'), title)
+        self.assertIn(f'--- PR Body ---\n{body}\n', output)
+        self.assertEqual(fake.call_count, 1)
+
     def test_pr_shows_branch(self):
         """pr: 현재 브랜치 이름을 출력하고 AI 요청에도 넣는다"""
         _code, output, fake = self.run_cli(['pr'])

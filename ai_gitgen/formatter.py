@@ -1,7 +1,11 @@
 
 """AI 출력 형식 검증과 다듬기 (Step 6)."""
 
+import re
+
 from ai_gitgen import config
+
+MARKDOWN_HEADING = re.compile(r'^#{1,6}\s+')
 
 
 def split_title_body(text):
@@ -10,15 +14,31 @@ def split_title_body(text):
 
     if lines and lines[0].strip().startswith('```'):
         lines = lines[1:]
-    if lines and lines[-1].strip() == '```':
-        lines = lines[:-1]
+        if lines and lines[-1].strip() == '```':
+            lines = lines[:-1]
 
-    if not lines:
-        return '', ''
+    title, _, body = '\n'.join(lines).strip().partition('\n')
+    return title.strip(), body.strip()
 
-    title = lines[0].strip()
-    body = '\n'.join(lines[1:]).strip()
-    return title, body
+
+def split_pr_title_body(text):
+    """PR 제목 표지를 걷어 내고 실제 제목과 본문을 나눈다."""
+    title, body = split_title_body(text)
+    title = MARKDOWN_HEADING.sub('', title)
+    label, _, inline_title = title.partition(':')
+    if label.strip() != 'PR 제목':
+        return title, body
+    if inline_title.strip():
+        return inline_title.strip(), body
+
+    first_line, _, remaining_body = body.partition('\n')
+    title = MARKDOWN_HEADING.sub('', first_line.strip())
+    if MARKDOWN_HEADING.match(first_line) and any(
+        title == section or title.startswith((section + ' ', section + '('))
+        for section in config.PR_SECTIONS
+    ):
+        return '', body
+    return title, remaining_body.strip()
 
 
 def shorten_title(title, max_length):

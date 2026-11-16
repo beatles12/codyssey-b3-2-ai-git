@@ -91,21 +91,49 @@ def send_http_request(url, headers, body, timeout):
     request = urllib.request.Request(
         url, data=data, headers=headers, method='POST'
     )
+    open_request = urllib.request.urlopen
+    if (request.type == 'https' and request.host == 'copa.codyssey.kr'
+            and urllib.request.getproxies().get('https')
+            and not urllib.request.proxy_bypass(request.host)):
+        opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+        open_request = opener.open
 
     try:
-        with urllib.request.urlopen(request, timeout=timeout) as response:
+        with open_request(request, timeout=timeout) as response:
             return json.loads(response.read().decode('utf-8'))
     except urllib.error.HTTPError as error:
         detail = ''
         try:
             error_data = json.loads(error.read().decode('utf-8'))
-            detail = error_data.get('error', {}).get('message', '')
-        except (ValueError, AttributeError, UnicodeDecodeError):
+            if isinstance(error_data, dict):
+                error_info = error_data.get('error', {})
+                if isinstance(error_info, dict):
+                    detail = error_info.get('message', '')
+                elif isinstance(error_info, str):
+                    detail = error_info
+                if not detail:
+                    detail = error_data.get('detail') or error_data.get('message', '')
+        except (ValueError, UnicodeDecodeError):
             pass
+
+        if isinstance(detail, (dict, list)):
+            detail = json.dumps(detail, ensure_ascii=False)
+
         message = f'AI API 요청 실패 (HTTP {error.code})'
         if detail:
-            message += f': {detail}'
+            detail = str(detail)
+            api_key = request.get_header('X-api-key')
+            if api_key is None:
+                authorization = request.get_header('Authorization', '')
+                api_key = authorization.removeprefix('Bearer ')
+            if api_key:
+                detail = detail.replace(api_key, '[MASKED]')
+            message += f': {detail[:500]}'
+        elif (error.headers
+              and 'text/html' in error.headers.get('Content-Type', '').lower()):
+            message += ': HTML 오류 응답입니다. 프록시 또는 게이트웨이를 확인하세요.'
         raise AIClientError(message) from error
+
     except urllib.error.URLError as error:
         raise AIClientError(
             f'AI API 네트워크 연결 실패: {error.reason}'

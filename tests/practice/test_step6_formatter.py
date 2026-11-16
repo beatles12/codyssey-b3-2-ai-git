@@ -36,6 +36,21 @@ class SplitTitleBodyTest(PracticeTestCase):
         self.assertEqual(title, 'feat: x')
         self.assertNotIn('```', body)
 
+    def test_fenced_message_with_blank_line_and_language(self):
+        message = '```markdown\n\nfeat: 검색 추가\n\n- 검색 구현\n```'
+        self.assertEqual(fm.split_title_body(message),
+                         ('feat: 검색 추가', '- 검색 구현'))
+        self.assertNotIn('```', fm.format_commit_output(message))
+
+    def test_code_fence_in_commit_body_is_preserved(self):
+        body = '- 실행 예시\n\n```text\nsearch\n```'
+        message = 'feat: 검색 추가\n\n' + body
+        self.assertIn(body, fm.format_commit_output(message))
+
+    def test_pr_title_label_without_title_preserves_body(self):
+        self.assertEqual(fm.split_pr_title_body('# PR 제목\n\n' + PR_BODY),
+                         ('', PR_BODY))
+
 
 class ShortenTitleTest(PracticeTestCase):
 

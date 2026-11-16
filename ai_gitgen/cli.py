@@ -174,7 +174,7 @@ def run_pr(args, cwd=None, transport=None):
         return 0
 
     response = request_ai(prompt, args, transport)
-    title, body = formatter.split_title_body(response)
+    title, body = formatter.split_pr_title_body(response)
 
     title = formatter.shorten_title(
         title, config.PR_TITLE_MAX
