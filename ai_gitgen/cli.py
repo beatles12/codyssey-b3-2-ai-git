@@ -191,7 +191,7 @@ def run_pr(args, cwd=None, transport=None):
     print(formatter.format_pr_output(title, body))
     return 0
 
-
+# main 함수에 공통 오류 처리 데코레이터 적용
 @handle_cli_errors
 def main(argv=None, cwd=None, transport=None):
     """명령을 해석하고 해당 업무를 실행한다."""
