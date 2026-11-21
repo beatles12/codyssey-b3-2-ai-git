@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 430" width="1200" height="430" role="img" aria-label="오류 처리 데코레이터: 안쪽에서 생긴 오류를 보호막이 받아 한 줄로 안내">
+  <defs>
+    <marker id="r" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#d0574b"/></marker>
+    <style>
+      text{font-family:Pretendard,'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR','Noto Sans CJK KR',sans-serif}
+      .m{font-family:Consolas,'D2Coding','Cascadia Mono',monospace}
+      .t{font-size:13.5px;fill:#4b647a}
+      .up{stroke:#d0574b;stroke-width:2.5;fill:none;stroke-dasharray:7 6;animation:d 1s linear infinite}
+      @keyframes d{to{stroke-dashoffset:13}}
+    </style>
+  </defs>
+  <rect x="1" y="1" width="1198" height="428" rx="22" fill="#fff" stroke="#d7e2eb" stroke-width="2"/>
+  <text x="36" y="46" font-size="20" font-weight="800" fill="#15324a">오류 처리 데코레이터 — 오류는 한곳에서 받아 안내</text>
+
+  <rect x="36" y="70" width="740" height="250" rx="18" fill="#f2faf8" stroke="#139a8f" stroke-width="3"/>
+  <rect x="56" y="58" width="300" height="28" rx="14" fill="#139a8f"/>
+  <text x="206" y="77" class="m" font-size="14" font-weight="700" fill="#fff" text-anchor="middle">@handle_cli_errors  보호막</text>
+  <rect x="60" y="104" width="692" height="196" rx="14" fill="#fff" stroke="#9fb6c8" stroke-dasharray="6 5"/>
+  <text x="80" y="130" class="m" font-size="14" fill="#5b7186">def main(): … run_commit() / run_pr()</text>
+  <g>
+    <rect x="80" y="196" width="206" height="84" rx="12" fill="#fdeeec" stroke="#e8a59c"/>
+    <text x="183" y="224" font-size="15" font-weight="800" fill="#15324a" text-anchor="middle">API 키 없음</text>
+    <text x="183" y="245" class="m" font-size="12.5" fill="#33506a" text-anchor="middle">get_api_key()</text>
+    <text x="183" y="266" class="m" font-size="12.5" fill="#b8352a" text-anchor="middle">MissingApiKeyError</text>
+    <rect x="304" y="196" width="206" height="84" rx="12" fill="#fdeeec" stroke="#e8a59c"/>
+    <text x="407" y="224" font-size="15" font-weight="800" fill="#15324a" text-anchor="middle">인증·네트워크 실패</text>
+    <text x="407" y="245" class="m" font-size="12.5" fill="#33506a" text-anchor="middle">send_http_request()</text>
+    <text x="407" y="266" class="m" font-size="12.5" fill="#b8352a" text-anchor="middle">AIClientError</text>
+    <rect x="528" y="196" width="206" height="84" rx="12" fill="#fdeeec" stroke="#e8a59c"/>
+    <text x="631" y="224" font-size="15" font-weight="800" fill="#15324a" text-anchor="middle">Git 저장소 아님</text>
+    <text x="631" y="245" class="m" font-size="12.5" fill="#33506a" text-anchor="middle">collect_changes()</text>
+    <text x="631" y="266" class="m" font-size="12.5" fill="#b8352a" text-anchor="middle">GitCommandError</text>
+  </g>
+  <path class="up" d="M183 194 V146 H760"/>
+  <path class="up" d="M407 194 V146"/>
+  <path class="up" d="M631 194 V146"/>
+  <path class="up" d="M760 146 H812" marker-end="url(#r)"/>
+
+  <rect x="820" y="104" width="344" height="110" rx="14" fill="#17212b"/>
+  <text x="840" y="132" font-size="12.5" font-weight="800" fill="#9fb3c4" letter-spacing="1.5">화면에는 한 줄만</text>
+  <text x="840" y="162" class="m" font-size="14.5" font-weight="700" fill="#ff8a7a">[ERROR] 원인과 조치 안내</text>
+  <text x="840" y="190" class="m" font-size="14.5" fill="#ffd28a">종료 코드 1 · 긴 Traceback 없음</text>
+
+  <rect x="820" y="228" width="344" height="92" rx="14" fill="#f4f8fb"/>
+  <text x="840" y="256" font-size="14" font-weight="800" fill="#15324a">보호막 밖에서 따로 처리</text>
+  <text x="840" y="280" class="t">옵션 범위 밖 → main()이 직접 [ERROR] · 코드 2</text>
+  <text x="840" y="304" class="t">변경 없음 → 오류 아님 · [INFO] · 코드 0</text>
+
+  <rect x="36" y="340" width="1128" height="68" rx="14" fill="#e6f4f2"/>
+  <text x="56" y="368" font-size="15" font-weight="800" fill="#0f6e7a">데코레이터 = 원래 함수는 그대로 두고 공통 처리로 감싸는 Python 기법</text>
+  <text x="56" y="392" font-size="14" fill="#1d4f55">함수마다 같은 try/except를 반복하지 않아도 되어 읽기 쉽고, commit과 pr의 오류 안내 형식이 같아집니다.</text>
+</svg>

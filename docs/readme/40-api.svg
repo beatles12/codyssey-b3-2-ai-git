@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 470" width="1200" height="470" role="img" aria-label="AI API 요청과 응답: 헤더와 JSON 본문을 보내고 응답에서 글만 꺼낸다">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#139a8f"/></marker>
+    <marker id="b" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#6b4fc9"/></marker>
+    <style>
+      text{font-family:Pretendard,'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR','Noto Sans CJK KR',sans-serif}
+      .m{font-family:Consolas,'D2Coding','Cascadia Mono',monospace}
+      .h{font-size:16px;font-weight:800;fill:#15324a}
+      .t{font-size:13.5px;fill:#4b647a}
+      .go{stroke:#139a8f;stroke-width:3;fill:none;stroke-dasharray:9 7;animation:d 1.2s linear infinite}
+      .back{stroke:#6b4fc9;stroke-width:3;fill:none;stroke-dasharray:9 7;animation:d 1.2s linear infinite}
+      @keyframes d{to{stroke-dashoffset:-16}}
+    </style>
+  </defs>
+  <rect x="1" y="1" width="1198" height="468" rx="22" fill="#fff" stroke="#d7e2eb" stroke-width="2"/>
+  <text x="36" y="46" font-size="20" font-weight="800" fill="#15324a">AI API 한 번의 요청과 응답</text>
+  <text x="1164" y="46" class="t" text-anchor="end"><tspan class="m">call_ai_api()</tspan> 안에서 일어나는 일 · 실행 1번에 1회</text>
+
+  <!-- 요청 봉투 -->
+  <rect x="36" y="70" width="470" height="312" rx="16" fill="#f4f8fb" stroke="#c9d6e0"/>
+  <text x="56" y="100" class="h">보내는 것</text>
+  <text x="486" y="100" class="t" text-anchor="end">HTTP POST</text>
+  <text x="56" y="130" class="t"><tspan class="m" fill="#0b5d66" font-weight="700">get_api_key()</tspan> → <tspan class="m" fill="#0b5d66" font-weight="700">build_headers()</tspan></text>
+  <rect x="56" y="140" width="430" height="74" rx="10" fill="#fff" stroke="#d7e2eb"/>
+  <text x="70" y="166" class="m" font-size="13.5" fill="#33506a">x-api-key: <tspan fill="#b06f10" font-weight="700">환경변수 AI_API_KEY (화면에 안 보임)</tspan></text>
+  <text x="70" y="190" class="m" font-size="13.5" fill="#33506a">anthropic-version · content-type: json</text>
+  <text x="56" y="240" class="t"><tspan class="m" fill="#0b5d66" font-weight="700">build_request_body()</tspan></text>
+  <rect x="56" y="250" width="430" height="116" rx="10" fill="#17212b"/>
+  <text x="72" y="276" class="m" font-size="13.5" fill="#d6e2ec">"model": <tspan fill="#7fe0c6">"claude-haiku-4"</tspan>,</text>
+  <text x="72" y="298" class="m" font-size="13.5" fill="#d6e2ec">"temperature": <tspan fill="#ffd28a">0.3</tspan>,  "max_tokens": <tspan fill="#ffd28a">1024</tspan>,</text>
+  <text x="72" y="320" class="m" font-size="13.5" fill="#d6e2ec">"messages": [{"role": "user",</text>
+  <text x="72" y="342" class="m" font-size="13.5" fill="#d6e2ec">   "content": <tspan fill="#c9b4ff">"(3단계의 작성 지시서)"</tspan>}]</text>
+
+  <!-- 서버 -->
+  <path class="go" d="M514 150 H664" marker-end="url(#a)"/>
+  <text x="589" y="138" class="m" font-size="13" fill="#0b5d66" text-anchor="middle">send_http_request()</text>
+  <rect x="672" y="92" width="200" height="190" rx="18" fill="#f1edfd" stroke="#b9a5f0" stroke-width="2"/>
+  <text x="772" y="140" font-size="18" font-weight="800" fill="#4f37a3" text-anchor="middle">AI 서비스</text>
+  <text x="772" y="166" class="m" font-size="13" fill="#6b4fc9" text-anchor="middle">copa.codyssey.kr</text>
+  <text x="772" y="186" class="m" font-size="13" fill="#6b4fc9" text-anchor="middle">/v1/messages</text>
+  <text x="772" y="222" class="t" text-anchor="middle">최대 30초 대기</text>
+  <text x="772" y="244" class="t" text-anchor="middle">실패 → AIClientError</text>
+  <path class="back" d="M872 230 H940" marker-end="url(#b)"/>
+
+  <!-- 응답 -->
+  <rect x="948" y="70" width="216" height="312" rx="16" fill="#fff6e6" stroke="#ecc98a"/>
+  <text x="966" y="100" class="h">받는 것</text>
+  <rect x="966" y="112" width="180" height="92" rx="10" fill="#17212b"/>
+  <text x="978" y="136" class="m" font-size="12.5" fill="#d6e2ec">{"content": [</text>
+  <text x="978" y="158" class="m" font-size="12.5" fill="#d6e2ec"> {"type": "text",</text>
+  <text x="978" y="180" class="m" font-size="12.5" fill="#d6e2ec">  "text": <tspan fill="#ffd28a">"feat: …"</tspan>}]}</text>
+  <text x="1056" y="230" class="m" font-size="13" fill="#8a4f08" text-anchor="middle" font-weight="700">extract_text()</text>
+  <text x="1056" y="250" font-size="18" fill="#b06f10" text-anchor="middle">↓</text>
+  <rect x="966" y="262" width="180" height="100" rx="10" fill="#fff" stroke="#ecc98a"/>
+  <text x="1056" y="292" font-size="14" font-weight="800" fill="#15324a" text-anchor="middle">AI가 쓴 글만</text>
+  <text x="1056" y="316" class="m" font-size="13" fill="#7a4f0c" text-anchor="middle">feat: 할 일 검색</text>
+  <text x="1056" y="336" class="m" font-size="13" fill="#7a4f0c" text-anchor="middle">기능 추가 …</text>
+
+  <!-- 모의 -->
+  <rect x="36" y="398" width="1128" height="50" rx="12" fill="#e6f4f2"/>
+  <text x="56" y="429" font-size="15" fill="#1d4f55"><tspan font-weight="800" fill="#0f6e7a">모의 시연(demo 5·7)</tspan> — <tspan class="m">send_http_request()</tspan> 자리에 가짜 응답(<tspan class="m">FakeTransport</tspan>)을 끼웁니다. 흐름은 같고, 네트워크·키·비용은 쓰지 않습니다.</text>
+</svg>

@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 420" width="1200" height="420" role="img" aria-label="Git 변경사항 수집: git status와 git diff --cached, git diff를 모아 파일 3개와 diff 47줄을 만든다">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#7fa9d4"/></marker>
+    <style>
+      text{font-family:Pretendard,'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR','Noto Sans CJK KR',sans-serif}
+      .m{font-family:Consolas,'D2Coding','Cascadia Mono',monospace;font-weight:700}
+      .h{font-size:17px;font-weight:800;fill:#15324a}
+      .t{font-size:14px;fill:#4b647a}
+      .flow{stroke:#7fa9d4;stroke-width:3;fill:none;stroke-dasharray:9 7;animation:d 1.2s linear infinite}
+      @keyframes d{to{stroke-dashoffset:-16}}
+    </style>
+  </defs>
+  <rect x="1" y="1" width="1198" height="418" rx="22" fill="#fff" stroke="#d7e2eb" stroke-width="2"/>
+  <text x="36" y="46" font-size="20" font-weight="800" fill="#15324a">Git 수정 장부에서 무엇을 읽어 오나</text>
+  <text x="1164" y="46" class="t" text-anchor="end">연습 저장소 <tspan class="m">feature</tspan> (브랜치 feature/add-search)</text>
+
+  <!-- 제출 대기함 -->
+  <rect x="36" y="76" width="370" height="150" rx="16" fill="#f2faf8" stroke="#7fc3b9" stroke-width="2"/>
+  <text x="56" y="106" class="h">제출 대기함 안 <tspan class="t">(git add 함 · staged)</tspan></text>
+  <rect x="56" y="122" width="330" height="36" rx="8" fill="#fff"/><text x="70" y="146" class="m" font-size="14" fill="#1d6a42">M  README.md</text><text x="372" y="146" class="m" font-size="14" fill="#2f9a63" text-anchor="end">+1</text>
+  <rect x="56" y="166" width="330" height="36" rx="8" fill="#fff"/><text x="70" y="190" class="m" font-size="14" fill="#1d6a42">A  todo_app/search.py</text><text x="372" y="190" class="m" font-size="14" fill="#2f9a63" text-anchor="end">+10</text>
+  <rect x="36" y="232" width="370" height="30" rx="8" fill="#e6f4f2"/><text x="221" y="252" class="m" font-size="14" fill="#0f6e7a" text-anchor="middle">git diff --cached 로 읽음</text>
+
+  <!-- 대기함 밖 -->
+  <rect x="36" y="280" width="370" height="96" rx="16" fill="#fafbfc" stroke="#a9c6dc" stroke-width="2" stroke-dasharray="8 6"/>
+  <text x="56" y="310" class="h">대기함 밖 <tspan class="t">(git add 안 함 · unstaged)</tspan></text>
+  <rect x="56" y="324" width="330" height="36" rx="8" fill="#fff"/><text x="70" y="348" class="m" font-size="14" fill="#1d4f80"> M todo_app/app.py</text><text x="372" y="348" class="m" font-size="14" text-anchor="end"><tspan fill="#2f9a63">+6</tspan> <tspan fill="#b8352a">−1</tspan></text>
+  <text x="221" y="400" class="m" font-size="14" fill="#2f6fb0" text-anchor="middle">git diff 로 읽음</text>
+
+  <!-- 함수 -->
+  <path class="flow" d="M414 150 C470 150 470 190 520 196" marker-end="url(#a)"/>
+  <path class="flow" d="M414 328 C470 328 470 250 520 244" marker-end="url(#a)"/>
+  <rect x="528" y="92" width="300" height="236" rx="16" fill="#eaf2fb" stroke="#7fa9d4" stroke-width="2"/>
+  <text x="678" y="124" class="m" font-size="16" fill="#15324a" text-anchor="middle">collect_changes()</text>
+  <text x="678" y="146" class="t" text-anchor="middle">이 함수가 아래를 차례로 부름</text>
+  <g font-size="14">
+    <rect x="548" y="160" width="260" height="30" rx="8" fill="#fff"/><text x="562" y="180" class="m" fill="#1d4f80">is_git_repository()</text><text x="796" y="180" class="t" text-anchor="end" font-size="12.5">저장소 확인</text>
+    <rect x="548" y="196" width="260" height="30" rx="8" fill="#fff"/><text x="562" y="216" class="m" fill="#1d4f80">get_changed_files()</text><text x="796" y="216" class="t" text-anchor="end" font-size="12.5">git status</text>
+    <rect x="548" y="232" width="260" height="30" rx="8" fill="#fff"/><text x="562" y="252" class="m" fill="#1d4f80">get_diff()</text><text x="796" y="252" class="t" text-anchor="end" font-size="12.5">두 diff 합치기</text>
+    <rect x="548" y="268" width="260" height="30" rx="8" fill="#fff"/><text x="562" y="288" class="m" fill="#1d4f80">count_diff_lines()</text><text x="796" y="288" class="t" text-anchor="end" font-size="12.5">줄 수 세기</text>
+  </g>
+
+  <!-- 결과 -->
+  <path class="flow" d="M836 210 H884" marker-end="url(#a)"/>
+  <rect x="892" y="92" width="272" height="236" rx="16" fill="#17212b"/>
+  <text x="912" y="124" font-size="13" font-weight="800" fill="#9fb3c4" letter-spacing="1.5">프로그램 화면</text>
+  <text x="912" y="168" class="m" font-size="15" fill="#8fb8d8">[INFO] 변경 파일: 3개</text>
+  <text x="912" y="198" class="m" font-size="15" fill="#8fb8d8">[INFO] Git diff: 47줄</text>
+  <line x1="912" y1="222" x2="1144" y2="222" stroke="#2b3946"/>
+  <text x="912" y="252" font-size="14" fill="#d6e2ec">파일 3개 = 대기함 안 2 + 밖 1</text>
+  <text x="912" y="278" font-size="14" fill="#d6e2ec">47줄 = 두 diff를 합친 전체 줄 수</text>
+  <text x="912" y="304" font-size="14" fill="#d6e2ec">(머리글 줄 포함)</text>
+
+  <rect x="528" y="346" width="636" height="50" rx="12" fill="#fff4dc"/>
+  <text x="548" y="377" font-size="14.5" fill="#7a4f0c"><tspan font-weight="800">주의</tspan> · git add 하지 않은 완전히 새 파일은 목록엔 보여도 내용은 diff에 들어가지 않습니다</text>
+</svg>

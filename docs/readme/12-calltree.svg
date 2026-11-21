@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 640" width="1200" height="640" role="img" aria-label="실제 함수 호출 관계 — pr 명령 예시">
+  <defs>
+    <style>
+      text{font-family:Pretendard,'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR','Noto Sans CJK KR',sans-serif}
+      .m{font-family:Consolas,'D2Coding','Cascadia Mono',monospace;font-weight:700}
+      .t{font-size:13px;fill:#4b647a}
+      .ln{stroke:#9fb3c4;stroke-width:2;fill:none}
+      .chip{font-size:13.5px}
+    </style>
+  </defs>
+  <rect x="1" y="1" width="1198" height="638" rx="22" fill="#fff" stroke="#d7e2eb" stroke-width="2"/>
+  <text x="36" y="46" font-size="20" font-weight="800" fill="#15324a">실제 함수 호출 관계 — <tspan class="m" font-size="19">py main.py pr</tspan> 예시</text>
+  <text x="1164" y="46" font-size="14" fill="#5b7186" text-anchor="end">총괄 함수가 담당 함수들에게 차례로 일을 맡깁니다 (commit도 같은 뼈대)</text>
+
+  <!-- 보호막 -->
+  <rect x="24" y="66" width="1152" height="552" rx="18" fill="#f3faf9" stroke="#139a8f" stroke-width="2.5" stroke-dasharray="8 6"/>
+  <rect x="40" y="56" width="250" height="26" rx="13" fill="#139a8f"/>
+  <text x="165" y="74" font-size="13.5" font-weight="800" fill="#fff" text-anchor="middle">@handle_cli_errors 보호막 (1-8)</text>
+
+  <!-- main -->
+  <rect x="48" y="104" width="190" height="62" rx="12" fill="#eef2f6" stroke="#9fb3c4"/>
+  <text x="143" y="132" class="m" font-size="17" fill="#15324a" text-anchor="middle">cli.main()</text>
+  <text x="143" y="153" class="t" text-anchor="middle">업무 총괄 · 접수</text>
+  <rect x="48" y="186" width="190" height="62" rx="12" fill="#fff" stroke="#c9d6e0"/>
+  <text x="143" y="212" class="m" font-size="14" fill="#33506a" text-anchor="middle">build_parser()</text>
+  <text x="143" y="234" class="m" font-size="14" fill="#33506a" text-anchor="middle">validate_options()</text>
+  <path class="ln" d="M143 166 V186"/>
+  <text x="143" y="272" class="t" text-anchor="middle">범위 밖이면 여기서 종료(코드 2)</text>
+
+  <!-- run_pr -->
+  <path class="ln" d="M238 135 H270"/>
+  <rect x="270" y="104" width="180" height="62" rx="12" fill="#15324a"/>
+  <text x="360" y="132" class="m" font-size="17" fill="#fff" text-anchor="middle">run_pr()</text>
+  <text x="360" y="153" font-size="13" fill="#bcd3e2" text-anchor="middle">PR 업무 총괄</text>
+
+  <!-- 줄기 -->
+  <path class="ln" d="M450 135 H476 V556"/>
+  <path class="ln" d="M476 135 H496 M476 284 H496 M476 342 H496 M476 400 H496 M476 556 H496"/>
+
+  <!-- ① collect_changes -->
+  <rect x="496" y="104" width="230" height="62" rx="12" fill="#eaf2fb" stroke="#7fa9d4"/>
+  <text x="514" y="131" font-size="14" font-weight="800" fill="#2f6fb0">①</text>
+  <text x="536" y="131" class="m" font-size="15.5" fill="#15324a">collect_changes()</text>
+  <text x="536" y="152" class="t">Git 자료 수집 · cli.py</text>
+  <path class="ln" d="M726 135 H748"/>
+  <g class="chip">
+    <rect x="748" y="92" width="196" height="30" rx="8" fill="#eaf2fb"/><text x="760" y="112" class="m" fill="#1d4f80">is_git_repository()</text>
+    <rect x="952" y="92" width="200" height="30" rx="8" fill="#eaf2fb"/><text x="964" y="112" class="m" fill="#1d4f80">get_changed_files()</text>
+    <rect x="748" y="128" width="130" height="30" rx="8" fill="#eaf2fb"/><text x="760" y="148" class="m" fill="#1d4f80">get_diff()</text>
+    <rect x="886" y="128" width="190" height="30" rx="8" fill="#eaf2fb"/><text x="898" y="148" class="m" fill="#1d4f80">count_diff_lines()</text>
+    <rect x="748" y="164" width="404" height="30" rx="8" fill="#fff4dc" stroke="#f0cf8a" stroke-dasharray="5 4"/><text x="760" y="184" class="m" fill="#8a5a0c">apply_safe_mode() → mask_sensitive()</text>
+  </g>
+  <text x="748" y="216" class="t">점선은 --safe-mode 시만 · 변경이 없으면 ①에서 정상 종료</text>
+
+  <!-- ② branch -->
+  <rect x="496" y="256" width="230" height="56" rx="12" fill="#eaf2fb" stroke="#7fa9d4"/>
+  <text x="514" y="281" font-size="14" font-weight="800" fill="#2f6fb0">②</text>
+  <text x="536" y="281" class="m" font-size="15" fill="#15324a">get_current_branch()</text>
+  <text x="536" y="301" class="t">브랜치 이름 · PR에만 있음</text>
+
+  <!-- ③ prompt -->
+  <rect x="496" y="318" width="230" height="48" rx="12" fill="#f1edfd" stroke="#b9a5f0"/>
+  <text x="514" y="347" font-size="14" font-weight="800" fill="#6b4fc9">③</text>
+  <text x="536" y="347" class="m" font-size="15" fill="#15324a">build_pr_prompt()</text>
+  <path class="ln" d="M726 342 H748"/>
+  <rect x="748" y="327" width="170" height="30" rx="8" fill="#f1edfd"/><text x="760" y="347" class="m chip" fill="#4f37a3">format_file_list()</text>
+  <text x="930" y="347" class="t">--dry-run이면 여기서 멈춤</text>
+
+  <!-- ④ AI -->
+  <rect x="496" y="376" width="230" height="62" rx="12" fill="#e6f4f2" stroke="#7fc3b9"/>
+  <text x="514" y="403" font-size="14" font-weight="800" fill="#0f6e7a">④</text>
+  <text x="536" y="403" class="m" font-size="15" fill="#15324a">request_ai()</text>
+  <text x="536" y="424" class="m" font-size="13.5" fill="#0f6e7a">→ call_ai_api()</text>
+  <path class="ln" d="M726 407 H748"/>
+  <g class="chip">
+    <rect x="748" y="376" width="150" height="30" rx="8" fill="#e6f4f2"/><text x="760" y="396" class="m" fill="#0b5d66">get_api_key()</text>
+    <rect x="906" y="376" width="150" height="30" rx="8" fill="#e6f4f2"/><text x="918" y="396" class="m" fill="#0b5d66">build_headers()</text>
+    <rect x="748" y="412" width="196" height="30" rx="8" fill="#e6f4f2"/><text x="760" y="432" class="m" fill="#0b5d66">build_request_body()</text>
+    <rect x="952" y="412" width="200" height="30" rx="8" fill="#e6f4f2"/><text x="964" y="432" class="m" fill="#0b5d66">send_http_request()</text>
+    <rect x="748" y="448" width="150" height="30" rx="8" fill="#e6f4f2"/><text x="760" y="468" class="m" fill="#0b5d66">extract_text()</text>
+  </g>
+  <text x="910" y="468" class="t">키가 없으면 첫 칸에서 오류</text>
+  <text x="748" y="496" class="t">모의 시연: send_http_request() 대신 가짜 응답(FakeTransport)</text>
+
+  <!-- ⑤ formatter -->
+  <rect x="496" y="526" width="230" height="62" rx="12" fill="#fff1e3" stroke="#e3b27a"/>
+  <text x="514" y="553" font-size="14" font-weight="800" fill="#b06f10">⑤</text>
+  <text x="536" y="553" class="m" font-size="15" fill="#15324a">formatter 함수들</text>
+  <text x="536" y="574" class="t">→ format_pr_output()로 출력</text>
+  <path class="ln" d="M726 556 H748"/>
+  <g class="chip">
+    <rect x="748" y="526" width="206" height="30" rx="8" fill="#fff1e3"/><text x="760" y="546" class="m" fill="#8a4f08">split_pr_title_body()</text>
+    <rect x="962" y="526" width="150" height="30" rx="8" fill="#fff1e3"/><text x="974" y="546" class="m" fill="#8a4f08">shorten_title()</text>
+    <rect x="748" y="562" width="190" height="30" rx="8" fill="#fff1e3"/><text x="760" y="582" class="m" fill="#8a4f08">validate_pr_title()</text>
+    <rect x="946" y="562" width="186" height="30" rx="8" fill="#fff1e3"/><text x="958" y="582" class="m" fill="#8a4f08">validate_pr_body()</text>
+  </g>
+  <text x="48" y="610" font-size="13.5" fill="#5b7186">commit은 ②가 없고, ③·⑤가 build_commit_prompt() · split_title_body() · validate_commit_message() · format_commit_output()으로 바뀝니다.</text>
+</svg>

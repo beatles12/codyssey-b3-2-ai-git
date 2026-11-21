@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 560" width="1200" height="560" role="img" aria-label="AI에게 보내는 PR 작성 지시서의 구성 (1)~(6)">
+  <defs>
+    <style>
+      text{font-family:Pretendard,'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR','Noto Sans CJK KR',sans-serif}
+      .m{font-family:Consolas,'D2Coding','Cascadia Mono',monospace}
+      .pl{font-size:14.5px;fill:#d6e2ec}
+      .b{font-size:12px;font-weight:800;fill:#17212b}
+      .lh{font-size:16px;font-weight:800;fill:#15324a}
+      .lt{font-size:13.5px;fill:#4b647a}
+    </style>
+  </defs>
+  <rect x="1" y="1" width="1198" height="558" rx="22" fill="#fff" stroke="#d7e2eb" stroke-width="2"/>
+  <text x="36" y="46" font-size="20" font-weight="800" fill="#15324a">AI 작성 지시서(프롬프트) 해부 — PR용</text>
+  <text x="1164" y="46" font-size="14" fill="#5b7186" text-anchor="end"><tspan class="m">--dry-run</tspan>으로 실제로 볼 수 있는 내용</text>
+
+  <rect x="36" y="68" width="640" height="466" rx="16" fill="#17212b"/>
+  <g class="m">
+    <rect x="52" y="86" width="34" height="20" rx="10" fill="#a9b8c6"/><text x="69" y="100" class="b" text-anchor="middle">역할</text>
+    <text x="96" y="101" class="pl">당신은 GitHub PR 초안을 작성하는 개발 도우미입니다.</text>
+    <rect x="52" y="116" width="34" height="20" rx="10" fill="#7fd0c3"/><text x="69" y="130" class="b" text-anchor="middle">1</text>
+    <text x="96" y="131" class="pl">아래 자료를 근거로 한국어 PR 제목과 본문을 작성하세요.</text>
+    <rect x="52" y="146" width="34" height="20" rx="10" fill="#ffd27a"/><text x="69" y="160" class="b" text-anchor="middle">4</text>
+    <text x="96" y="161" class="pl">PR 제목은 최대 80자를 넘지 마세요.</text>
+    <rect x="52" y="176" width="34" height="20" rx="10" fill="#9fe39a"/><text x="69" y="190" class="b" text-anchor="middle">6</text>
+    <text x="96" y="191" class="pl">본문에는 다음 세 가지 제목을 반드시 포함하세요.</text>
+    <text x="96" y="214" class="pl" fill="#c9b4ff">## Why    ## What    ## How to Test</text>
+    <rect x="52" y="228" width="34" height="20" rx="10" fill="#ffd27a"/><text x="69" y="242" class="b" text-anchor="middle">4</text>
+    <text x="96" y="243" class="pl">각 항목에 최소 한 개 이상의 구체적인 불릿을 작성하세요.</text>
+    <rect x="52" y="258" width="34" height="20" rx="10" fill="#ff9f8f"/><text x="69" y="272" class="b" text-anchor="middle">5</text>
+    <text x="96" y="273" class="pl">실제로 확인하지 않은 테스트는 통과했다고 쓰지 마세요.</text>
+    <rect x="52" y="288" width="34" height="20" rx="10" fill="#ff9f8f"/><text x="69" y="302" class="b" text-anchor="middle">5</text>
+    <text x="96" y="303" class="pl">자료에 없는 변경 내용은 추측하지 마세요.</text>
+    <line x1="52" y1="322" x2="660" y2="322" stroke="#2b3946"/>
+    <rect x="52" y="336" width="34" height="20" rx="10" fill="#9fe39a"/><text x="69" y="350" class="b" text-anchor="middle">6</text>
+    <text x="96" y="351" class="pl">현재 브랜치: feature/add-search</text>
+    <rect x="52" y="366" width="34" height="20" rx="10" fill="#8fc1f0"/><text x="69" y="380" class="b" text-anchor="middle">2</text>
+    <text x="96" y="381" class="pl">변경된 파일: [M] README.md · [M] app.py · [A] search.py</text>
+    <rect x="52" y="396" width="34" height="20" rx="10" fill="#b9a5f7"/><text x="69" y="410" class="b" text-anchor="middle">3</text>
+    <text x="96" y="411" class="pl">Git diff:</text>
+    <text x="96" y="436" class="pl" fill="#7fd99a">+def search_todos(keyword):</text>
+    <text x="96" y="460" class="pl" fill="#7fd99a">+    keyword = keyword.strip().lower()</text>
+    <text x="96" y="484" class="pl" fill="#ff9b8f">-    TODOS.append({'title': title, ...})</text>
+    <text x="96" y="510" class="pl" fill="#8293a3">… (실제 diff 47줄)</text>
+  </g>
+
+  <g>
+    <rect x="704" y="68" width="460" height="56" rx="12" fill="#f4f8fb"/>
+    <rect x="720" y="86" width="36" height="22" rx="11" fill="#7fd0c3"/><text x="738" y="101" class="b" text-anchor="middle">1</text>
+    <text x="770" y="93" class="lh">한국어로 쓸 것</text><text x="770" y="114" class="lt">팀이 읽을 언어로 받기</text>
+
+    <rect x="704" y="132" width="460" height="56" rx="12" fill="#f4f8fb"/>
+    <rect x="720" y="150" width="36" height="22" rx="11" fill="#8fc1f0"/><text x="738" y="165" class="b" text-anchor="middle">2</text>
+    <text x="770" y="157" class="lh">변경 파일 목록</text><text x="770" y="178" class="lt">어떤 파일을 고쳤는지 근거</text>
+
+    <rect x="704" y="196" width="460" height="56" rx="12" fill="#f4f8fb"/>
+    <rect x="720" y="214" width="36" height="22" rx="11" fill="#b9a5f7"/><text x="738" y="229" class="b" text-anchor="middle">3</text>
+    <text x="770" y="221" class="lh">실제 diff</text><text x="770" y="242" class="lt">실제로 바뀐 줄 = 가장 중요한 근거</text>
+
+    <rect x="704" y="260" width="460" height="56" rx="12" fill="#f4f8fb"/>
+    <rect x="720" y="278" width="36" height="22" rx="11" fill="#ffd27a"/><text x="738" y="293" class="b" text-anchor="middle">4</text>
+    <text x="770" y="285" class="lh">결과물 규칙</text><text x="770" y="306" class="lt">제목 길이, 섹션마다 불릿</text>
+
+    <rect x="704" y="324" width="460" height="56" rx="12" fill="#fdeeec" stroke="#f2b8ae"/>
+    <rect x="720" y="342" width="36" height="22" rx="11" fill="#ff9f8f"/><text x="738" y="357" class="b" text-anchor="middle">5</text>
+    <text x="770" y="349" class="lh">추측 금지</text><text x="770" y="370" class="lt">없는 변경·안 한 테스트를 지어내지 않게</text>
+
+    <rect x="704" y="388" width="460" height="56" rx="12" fill="#f4f8fb"/>
+    <rect x="720" y="406" width="36" height="22" rx="11" fill="#9fe39a"/><text x="738" y="421" class="b" text-anchor="middle">6</text>
+    <text x="770" y="413" class="lh">브랜치명 + Why / What / How to Test</text><text x="770" y="434" class="lt">PR에만 추가 — 검토자가 읽는 순서</text>
+
+    <rect x="704" y="456" width="460" height="78" rx="12" fill="#e6f4f2"/>
+    <text x="724" y="486" font-size="15" font-weight="800" fill="#0f6e7a">커밋 지시서는?</text>
+    <text x="724" y="512" font-size="14" fill="#1d4f55">(6)이 빠지고 "제목 50자 권장 · 최대 72자"로 바뀜</text>
+  </g>
+</svg>

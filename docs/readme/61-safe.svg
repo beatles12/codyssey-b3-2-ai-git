@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 400" width="1200" height="400" role="img" aria-label="안전 모드: sk- 키와 이메일은 가리고 전화번호와 비밀번호는 남는다">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#139a8f"/></marker>
+    <style>
+      text{font-family:Pretendard,'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR','Noto Sans CJK KR',sans-serif}
+      .m{font-family:Consolas,'D2Coding','Cascadia Mono',monospace}
+      .dl{font-size:14.5px}
+      .flow{stroke:#139a8f;stroke-width:3;fill:none;stroke-dasharray:9 7;animation:d 1.2s linear infinite}
+      @keyframes d{to{stroke-dashoffset:-16}}
+    </style>
+  </defs>
+  <rect x="1" y="1" width="1198" height="398" rx="22" fill="#fff" stroke="#d7e2eb" stroke-width="2"/>
+  <text x="36" y="46" font-size="20" font-weight="800" fill="#15324a">안전 모드(<tspan class="m">--safe-mode</tspan>)가 가리는 것, 남는 것</text>
+  <text x="1164" y="46" font-size="14" fill="#5b7186" text-anchor="end">연습용 가짜 데이터 · demo 3</text>
+
+  <text x="36" y="84" font-size="15" font-weight="800" fill="#b8352a">끔 — 그대로 AI로 전송</text>
+  <rect x="36" y="96" width="480" height="176" rx="14" fill="#fbfcfd" stroke="#d7e2eb"/>
+  <g class="m dl">
+    <rect x="48" y="108" width="456" height="34" rx="7" fill="#fdf1ef"/><text x="60" y="131" fill="#8f2b20">+API_KEY = "sk-fake-practice-0000…"</text>
+    <rect x="48" y="148" width="456" height="34" rx="7" fill="#fdf1ef"/><text x="60" y="171" fill="#8f2b20">+ADMIN_EMAIL = "admin@example.com"</text>
+    <rect x="48" y="188" width="456" height="34" rx="7" fill="#fdf1ef"/><text x="60" y="211" fill="#8f2b20">+SUPPORT_PHONE = "010-1234-5678"</text>
+    <rect x="48" y="228" width="456" height="34" rx="7" fill="#fdf1ef"/><text x="60" y="251" fill="#8f2b20">+DB_PASSWORD = "fake-password-1234"</text>
+  </g>
+
+  <path class="flow" d="M524 184 H630" marker-end="url(#a)"/>
+  <text x="577" y="170" class="m" font-size="11.5" fill="#0f6e7a" text-anchor="middle">mask_sensitive()</text>
+
+  <text x="640" y="84" font-size="15" font-weight="800" fill="#0f6e7a">켬 — 가린 뒤 전송</text>
+  <rect x="640" y="96" width="524" height="176" rx="14" fill="#fbfcfd" stroke="#d7e2eb"/>
+  <g class="m dl">
+    <rect x="652" y="108" width="500" height="34" rx="7" fill="#e6f4f2"/><text x="664" y="131" fill="#0f6e7a">+API_KEY = "[MASKED]"</text>
+    <rect x="652" y="148" width="500" height="34" rx="7" fill="#e6f4f2"/><text x="664" y="171" fill="#0f6e7a">+ADMIN_EMAIL = "[MASKED]"</text>
+    <rect x="652" y="188" width="500" height="34" rx="7" fill="#fdf1ef"/><text x="664" y="211" fill="#8f2b20">+SUPPORT_PHONE = "010-1234-5678"</text>
+    <rect x="652" y="228" width="500" height="34" rx="7" fill="#fdf1ef"/><text x="664" y="251" fill="#8f2b20">+DB_PASSWORD = "fake-password-1234"</text>
+  </g>
+  <g font-size="12.5" font-weight="800">
+    <rect x="1040" y="114" width="104" height="22" rx="11" fill="#139a8f"/><text x="1092" y="130" fill="#fff" text-anchor="middle">가려짐 · 키</text>
+    <rect x="1040" y="154" width="104" height="22" rx="11" fill="#139a8f"/><text x="1092" y="170" fill="#fff" text-anchor="middle">가려짐 · 이메일</text>
+    <rect x="1040" y="194" width="104" height="22" rx="11" fill="#ffe1a3"/><text x="1092" y="210" fill="#7a4c05" text-anchor="middle">남음</text>
+    <rect x="1040" y="234" width="104" height="22" rx="11" fill="#ffe1a3"/><text x="1092" y="250" fill="#7a4c05" text-anchor="middle">남음</text>
+  </g>
+
+  <rect x="36" y="290" width="1128" height="88" rx="14" fill="#fff4dc"/>
+  <text x="56" y="318" font-size="15" font-weight="800" fill="#7a4f0c">아직 지키지 못하는 것</text>
+  <text x="56" y="342" font-size="14" fill="#7a4f0c">전화번호 · 일반 비밀번호 · 다른 형식의 키 · 프롬프트에 따로 들어가는 파일 경로와 브랜치명</text>
+  <text x="56" y="364" font-size="14" fill="#7a4f0c">10파일·200줄 전송 제한 <tspan class="m">limit_diff()</tspan>는 미구현 · diff에는 <tspan font-weight="800">지운 줄도</tspan> 들어감</text>
+</svg>
